@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { BLOG_TITLE } from "../../lib/constants";
 
 const Meta = () => {
   return (
@@ -27,6 +28,8 @@ const Meta = () => {
       <meta name="theme-color" content="#000" />
       <meta property="og:image" content="/assets/og-image.png" />
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={BLOG_TITLE} />
+      <meta name="twitter:image" content="/assets/og-image.png" />
     </Head>
   );
 };
