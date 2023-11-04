@@ -12,9 +12,11 @@ const Layout = ({ children }: Props) => {
   return (
     <>
       <Meta />
-      <div className="h-screen md:p-10 p-4 flex flex-col">
-        <Header />
-        <div className="h-0 grow w-full">{children}</div>
+      <div className="h-screen w-full">
+        <div className="md:p-10 p-4 flex flex-col h-full w-full">
+          <Header />
+          <div className="h-0 grow w-full">{children}</div>
+        </div>
       </div>
     </>
   );
