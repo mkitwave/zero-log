@@ -10,10 +10,15 @@ export const Header = () => {
 
   return (
     <header className="flex border-b justify-between border-gray-500 items-center h-20">
-      <div className="gap-x-4 flex text-2xl items-center font-light">
+      <div className="md:gap-x-4 gap-x-2 flex text-xl md:text-2xl items-center font-light">
         {pathname !== "/" && (
           <Link href="/" className="mr-2">
-            <Image src={keyVisual} alt="key visual" width={50} />
+            <Image
+              src={keyVisual}
+              alt="key visual"
+              width={50}
+              className="md:w-10 md:h-10 h-8 w-8"
+            />
           </Link>
         )}
         <Link href="/posts" className="hover:decoration-1 hover:underline">
@@ -23,7 +28,7 @@ export const Header = () => {
           Resume
         </Link>
       </div>
-      <div className="gap-x-2 flex text-black">
+      <div className="gap-x-2 md:text-md text-sm flex text-black">
         <a
           href={PERSONAL_LINKS.twitter}
           target="_blank"
