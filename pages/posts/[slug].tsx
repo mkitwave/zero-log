@@ -22,7 +22,7 @@ export default function Post({ post, morePosts, preview }: Props) {
     return <ErrorPage statusCode={404} />;
   }
   return (
-    <article className="p-10">
+    <article className="md:p-10 p-3">
       <Head>
         <title>{title}</title>
         <meta property="og:image" content={post.ogImage.url} />

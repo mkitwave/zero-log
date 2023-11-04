@@ -10,7 +10,7 @@ export const Header = () => {
 
   return (
     <header className="flex border-b justify-between border-gray-500 items-center h-20">
-      <div className="md:gap-x-4 gap-x-2 flex text-xl md:text-2xl items-center font-light">
+      <div className="md:gap-x-4 gap-x-2 flex text-lg md:text-2xl items-center font-light">
         {pathname !== "/" && (
           <Link href="/" className="mr-2">
             <Image

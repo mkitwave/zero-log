@@ -6,7 +6,7 @@ const KeyVisual = () => {
     <section className="flex [max-1190px:h-0] grow items-center w-full">
       <div className="flex [max-1190px:flex-row] flex-col items-center gap-x-20 w-full py-10">
         <Image src={keyVisual} alt="key visual" width={450} />
-        <p className="text-7xl text-gray-900">
+        <p className="md:text-7xl text-6xl text-gray-900">
           <span className="font-light">{"I'm"}</span>
           <br />
           <span className="font-medium">Frontend Developer</span>

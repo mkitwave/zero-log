@@ -9,7 +9,7 @@ export default function Home() {
         <title>{BLOG_TITLE}</title>
       </Head>
       <div className="flex flex-col h-full w-full">
-        <h1 className="shrink-0 md:text-[20rem] text-[13rem] md:break-words text-gray-900 flex pb-2 tracking-tight leading-tight md:pr-8">
+        <h1 className="shrink-0 md:text-[20rem] text-[12rem] md:break-words text-gray-900 flex pb-2 tracking-tight leading-tight md:pr-8">
           Zero. log
         </h1>
         <KeyVisual />

@@ -8,7 +8,7 @@ export default function Resume() {
       <Head>
         <title>Resume | {BLOG_TITLE}</title>
       </Head>
-      <article className="p-10 w-full h-full">
+      <article className="md:p-10 p-3 w-full h-full">
         <div className="flex flex-col w-full h-full items-center">
           <div className="flex md:h-1/2 md:flex-row flex-col w-full items-end">
             <Box className="text-4xl text-start">
@@ -28,8 +28,8 @@ export default function Resume() {
           </div>
           <hr className="border-gray-500 border w-[5rem] md:flex hidden" />
           <div className="flex md:h-1/2 md:flex-row flex-col md:h-full w-full">
-            <Box className="gap-y-4 flex flex-col">
-              <div className="gap-x-4 flex">
+            <Box className="md:gap-y-4 gap-y-2 flex flex-col">
+              <div className="md:gap-x-3 gap-x-1 flex">
                 <div className="rounded-full bg-black text-white px-4 h-10 flex items-center justify-center">
                   React
                 </div>
@@ -40,7 +40,7 @@ export default function Resume() {
                   Tailwind CSS
                 </div>
               </div>
-              <div className="gap-x-4 flex">
+              <div className="md:gap-x-3 gap-x-1 flex">
                 <div className="rounded-full border-gray-500 border px-4 h-10 flex items-center justify-center">
                   Remix
                 </div>

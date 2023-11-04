@@ -12,7 +12,7 @@ const Layout = ({ children }: Props) => {
   return (
     <>
       <Meta />
-      <div className="h-screen py-10 px-10 flex flex-col">
+      <div className="h-screen md:p-10 p-4 flex flex-col">
         <Header />
         <div className="h-0 grow w-full">{children}</div>
       </div>
