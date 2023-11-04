@@ -26,6 +26,7 @@ const Meta = () => {
       <meta name="msapplication-config" content="/favicon/browserconfig.xml" />
       <meta name="theme-color" content="#000" />
       <meta property="og:image" content="/assets/og-image.png" />
+      <meta name="twitter:card" content="summary_large_image" />
     </Head>
   );
 };
