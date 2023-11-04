@@ -1,25 +1,22 @@
-import Container from "../components/container";
-import MoreStories from "../components/more-stories";
-import HeroPost from "../components/hero-post";
-import Intro from "../components/intro";
-import Layout from "../components/layout";
-import { getAllPosts } from "../lib/api";
 import Head from "next/head";
-import { BLOG_NAME } from "../lib/constants";
+import { HeroPost, Intro, MoreStories } from "../components/Home";
+import { Container, Layout } from "../components/Common";
+import { getAllPosts } from "../lib/api";
+import { BLOG_TITLE } from "../lib/constants";
 import Post from "../interfaces/post";
 
 type Props = {
   allPosts: Post[];
 };
 
-export default function Index({ allPosts }: Props) {
+export default function Home({ allPosts }: Props) {
   const heroPost = allPosts[0];
   const morePosts = allPosts.slice(1);
   return (
     <>
       <Layout>
         <Head>
-          <title>{BLOG_NAME}</title>
+          <title>{BLOG_TITLE}</title>
         </Head>
         <Container>
           <Intro />

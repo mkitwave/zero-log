@@ -1,16 +1,12 @@
 import { useRouter } from "next/router";
-import ErrorPage from "next/error";
-import Container from "../../components/container";
-import PostBody from "../../components/post-body";
-import Header from "../../components/header";
-import PostHeader from "../../components/post-header";
-import Layout from "../../components/layout";
-import { getAllPosts, getPostBySlug } from "../../lib/api";
-import PostTitle from "../../components/post-title";
 import Head from "next/head";
+import ErrorPage from "next/error";
+import { getAllPosts, getPostBySlug } from "../../lib/api";
 import { CMS_NAME } from "../../lib/constants";
 import markdownToHtml from "../../lib/markdownToHtml";
 import type PostType from "../../interfaces/post";
+import { Container, Header, Layout } from "../../components/Common";
+import { PostBody, PostHeader, PostTitle } from "../../components/Post";
 
 type Props = {
   post: PostType;
@@ -25,7 +21,7 @@ export default function Post({ post, morePosts, preview }: Props) {
     return <ErrorPage statusCode={404} />;
   }
   return (
-    <Layout preview={preview}>
+    <Layout>
       <Container>
         <Header />
         {router.isFallback ? (
