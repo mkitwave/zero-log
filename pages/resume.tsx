@@ -70,7 +70,7 @@ type BoxProps = {
 
 const Box = ({ children, className }: BoxProps) => (
   <div
-    className={`md:w-1/2 w-full break-keep h-full flex md:items-center justify-center p-5 ${className}`}
+    className={`md:w-1/2 w-full break-keep h-full flex md:items-center md:justify-center p-5 md:p-16 ${className}`}
   >
     {children}
   </div>
