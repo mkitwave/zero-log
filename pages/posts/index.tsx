@@ -37,7 +37,7 @@ export default function Posts({ allPosts }: Props) {
       </Head>
       <div className="flex flex-col h-full w-full py-10">
         <div className="flex flex-wrap w-full">
-          <div className="w-1/4 min-w-[24rem] h-[20rem] rounded text-xl">
+          <div className="lg:w-1/4 lg:min-w-[20rem] lg:max-w-full lg:h-[20rem] h-[5rem] rounded text-xl">
             {tags.map((tag) => (
               <button
                 key={tag}

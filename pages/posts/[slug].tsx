@@ -22,24 +22,24 @@ export default function Post({ post, morePosts, preview }: Props) {
     return <ErrorPage statusCode={404} />;
   }
   return (
-    <article className="p-10">
+    <article className="md:p-10 p-3">
       <Head>
         <title>{title}</title>
         <meta property="og:image" content={post.ogImage.url} />
       </Head>
       <div className="flex flex-col items-center">
-        <div className="w-[65rem] flex flex-col pt-[3rem] gap-y-4 mb-16">
-          <h1 className="text-6xl font-medium tracking-tighter leading-tight md:leading-none text-center md:text-left">
+        <div className="w-[65rem] max-w-full flex flex-col pt-[3rem] gap-y-4 mb-16">
+          <h1 className="text-6xl font-medium break-keep tracking-tighter leading-tight md:leading-none md:text-start text-center">
             {post.title}
           </h1>
-          <span className="font-bold text-zinc-400 text-lg">
+          <span className="font-bold text-zinc-400 md:text-start text-center text-lg">
             <DateFormatter dateString={post.date} />
           </span>
         </div>
-        <div className="w-[75rem] overflow-hidden border border-gray-500 rounded-xl mb-16">
+        <div className="w-[75rem] max-w-full overflow-hidden border border-gray-500 rounded-xl mb-16">
           <CoverImage title={title} src={post.coverImage} />
         </div>
-        <div className="w-[65rem]">
+        <div className="w-[65rem] max-w-full">
           <div
             className={markdownStyles["markdown"]}
             dangerouslySetInnerHTML={{ __html: post.content }}
