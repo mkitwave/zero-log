@@ -1,24 +1,15 @@
 import Link from "next/link";
-import type Author from "../../interfaces/author";
-import { Avatar, CoverImage, DateFormatter } from "../Common";
+import { CoverImage, DateFormatter } from "../Common";
 
 type Props = {
   title: string;
   coverImage: string;
   date: string;
   excerpt: string;
-  author: Author;
   slug: string;
 };
 
-const HeroPost = ({
-  title,
-  coverImage,
-  date,
-  excerpt,
-  author,
-  slug,
-}: Props) => {
+const HeroPost = ({ title, coverImage, date, excerpt, slug }: Props) => {
   return (
     <section>
       <div className="mb-8 md:mb-16">
@@ -38,10 +29,6 @@ const HeroPost = ({
           <div className="mb-4 md:mb-0 text-lg">
             <DateFormatter dateString={date} />
           </div>
-        </div>
-        <div>
-          <p className="text-lg leading-relaxed mb-4">{excerpt}</p>
-          <Avatar name={author.name} picture={author.picture} />
         </div>
       </div>
     </section>
