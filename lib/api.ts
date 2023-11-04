@@ -1,6 +1,7 @@
 import fs from "fs";
 import { join } from "path";
 import matter from "gray-matter";
+import { filter, map, pipe, toArray } from "@fxts/core";
 
 const postsDirectory = join(process.cwd(), "_posts");
 
@@ -36,6 +37,13 @@ export function getPostBySlug(slug: string, fields: string[] = []) {
 
   return items;
 }
+
+const a = pipe(
+  [1, 2, 3, 4, 5],
+  map((a) => a + 10),
+  filter((a) => a % 2 === 0),
+  toArray,
+);
 
 export function getAllPosts(fields: string[] = []) {
   const slugs = getPostSlugs();

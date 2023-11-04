@@ -2,11 +2,12 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import ErrorPage from "next/error";
 import { getAllPosts, getPostBySlug } from "../../lib/api";
-import { CMS_NAME } from "../../lib/constants";
+import { BLOG_TITLE } from "../../lib/constants";
 import markdownToHtml from "../../lib/markdownToHtml";
 import type PostType from "../../interfaces/post";
-import { Container, Header, Layout } from "../../components/Common";
-import { PostBody, PostHeader, PostTitle } from "../../components/Post";
+import CoverImage from "../../components/Common/cover-image";
+import markdownStyles from "../../components/Post/markdown-styles.module.css";
+import { DateFormatter } from "../../components/Common";
 
 type Props = {
   post: PostType;
@@ -16,34 +17,36 @@ type Props = {
 
 export default function Post({ post, morePosts, preview }: Props) {
   const router = useRouter();
-  const title = `${post.title} | Next.js Blog Example with ${CMS_NAME}`;
+  const title = `${post.title} | ${BLOG_TITLE}`;
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />;
   }
   return (
-    <Layout>
-      <Container>
-        <Header />
-        {router.isFallback ? (
-          <PostTitle>Loading…</PostTitle>
-        ) : (
-          <>
-            <article className="mb-32">
-              <Head>
-                <title>{title}</title>
-                <meta property="og:image" content={post.ogImage.url} />
-              </Head>
-              <PostHeader
-                title={post.title}
-                coverImage={post.coverImage}
-                date={post.date}
-              />
-              <PostBody content={post.content} />
-            </article>
-          </>
-        )}
-      </Container>
-    </Layout>
+    <article className="p-10">
+      <Head>
+        <title>{title}</title>
+        <meta property="og:image" content={post.ogImage.url} />
+      </Head>
+      <div className="flex flex-col items-center">
+        <div className="w-[65rem] flex flex-col pt-[3rem] gap-y-4 mb-16">
+          <h1 className="text-6xl font-medium tracking-tighter leading-tight md:leading-none text-center md:text-left">
+            {post.title}
+          </h1>
+          <span className="font-bold text-zinc-400 text-lg">
+            <DateFormatter dateString={post.date} />
+          </span>
+        </div>
+        <div className="w-[75rem] overflow-hidden border border-gray-500 rounded-xl mb-16">
+          <CoverImage title={title} src={post.coverImage} />
+        </div>
+        <div className="w-[65rem]">
+          <div
+            className={markdownStyles["markdown"]}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </div>
+      </div>
+    </article>
   );
 }
 

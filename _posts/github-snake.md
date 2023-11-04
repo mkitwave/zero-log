@@ -1,17 +1,16 @@
 ---
 title: "Github 프로필에 잔디 먹는 뱀 추가하기"
-excerpt: "👀 2분의 투자로, 역동적이고 재밌게 깃허브 꾸미기"
+excerpt: "2분의 투자로, 역동적이고 재밌게 깃허브 꾸미기"
 date: "2021-07-20"
 tags:
-  - Github
-coverImage: "/assets/blog/dynamic-routing/cover.jpg"
+  - GITHUB
+coverImage: "/assets/blog/github-snake/cover.jpg"
 ogImage:
-  url: "/assets/blog/dynamic-routing/cover.jpg"
+  url: "/assets/blog/github-snake/cover.jpg"
 ---
 
 ## 프롤로그
 
-안녕하세요! 제로입니다.
 [찬성 님의 facebook 포스팅][facebook-posting]을 보고 너무 신기해서 따라해보게 된 Github Action을 소개해 드릴게요.
 
 ![github-contribution-grid-snake](https://user-images.githubusercontent.com/52748335/125471173-30203e61-5705-43f9-9a85-afa9d643d45a.gif)
