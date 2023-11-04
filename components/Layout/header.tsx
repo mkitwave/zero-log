@@ -2,14 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import keyVisual from "../../public/assets/key-visual-eyes.gif";
 import { PERSONAL_LINKS } from "../../lib/constants";
-import { TfiArrowTopRight } from "react-icons/tfi";
+import { TfiArrowTopRight, TfiGithub, TfiTwitterAlt } from "react-icons/tfi";
 import { usePathname } from "next/navigation";
 
 export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="flex border-b justify-between border-gray-500 items-center h-20">
+    <header className="flex border-b gap-x-4 justify-between border-gray-500 items-center h-20">
       <div className="md:gap-x-4 gap-x-2 flex text-lg md:text-2xl items-center font-light">
         {pathname !== "/" && (
           <Link href="/" className="mr-2">
@@ -28,22 +28,24 @@ export const Header = () => {
           Resume
         </Link>
       </div>
-      <div className="gap-x-2 md:text-md text-sm flex text-black">
+      <div className="gap-x-3 md:text-md text-sm flex text-black">
         <a
           href={PERSONAL_LINKS.twitter}
           target="_blank"
-          className="rounded-full border border-gray-500 h-10 flex gap-x-1.5 items-center px-3 justify-center"
+          className="rounded-full md:border md:border-gray-500 h-10 flex gap-x-1.5 items-center md:px-3 justify-center"
         >
-          Twitter
-          <TfiArrowTopRight className="w-4 h-4 mt-1" />
+          <TfiTwitterAlt className="md:hidden w-6 h-6" />
+          <span className="md:flex hidden">Twitter</span>
+          <TfiArrowTopRight className="w-4 h-4 mt-1 md:flex hidden" />
         </a>
         <a
           href={PERSONAL_LINKS.github}
           target="_blank"
-          className="rounded-full border border-gray-500 h-10 flex gap-x-1.5 items-center px-3 justify-center"
+          className="rounded-full md:border md:border-gray-500 h-10 flex gap-x-1.5 items-center md:px-3 justify-center"
         >
-          Github
-          <TfiArrowTopRight className="w-4 h-4 mt-1" />
+          <TfiGithub className="md:hidden w-6 h-6" />
+          <span className="md:flex hidden">Github</span>
+          <TfiArrowTopRight className="w-4 h-4 mt-1 md:flex hidden" />
         </a>
       </div>
     </header>
