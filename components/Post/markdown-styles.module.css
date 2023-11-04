@@ -1,0 +1,38 @@
+.markdown {
+    @apply text-lg leading-loose;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote {
+    @apply my-6;
+}
+
+.markdown h2 {
+    @apply text-3xl mt-12 mb-4 leading-snug font-medium;
+}
+
+.markdown h3 {
+    @apply text-2xl mt-8 mb-4 leading-snug;
+}
+
+.markdown code {
+    @apply bg-gray-200 rounded-lg break-all px-1
+}
+
+.markdown pre {
+    @apply bg-gray-200 break-all w-full p-4 rounded-xl overflow-x-scroll
+}
+
+.markdown pre > code {
+    @apply bg-transparent
+}
+
+.markdown b {
+    @apply font-bold
+}
+
+.markdown a {
+    @apply underline
+}
