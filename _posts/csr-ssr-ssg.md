@@ -3,7 +3,7 @@ title: "CSR SSR SSG 뽀개기"
 excerpt: "이제는 알아야 한다"
 date: "2023-11-05"
 tags:
-  - GITHUB
+  - WEB
 coverImage: "/assets/blog/csr-ssr-ssg/cover.jpg"
 ogImage:
   url: "/assets/blog/csr-ssr-ssg/cover.jpg"
@@ -25,22 +25,22 @@ ogImage:
 
 ### 동작 방식
 
-[https://youtu.be/4-Lel1oaV7M?si=36cLtt2deTsEE4Rg](https://youtu.be/4-Lel1oaV7M?si=36cLtt2deTsEE4Rg)
+[참고하면 좋은 영상](https://youtu.be/4-Lel1oaV7M?si=36cLtt2deTsEE4Rg)
 
 1. 첫 페이지 로드 시 클라이언트는 CDN에서 script, style 태그만이 포함된 HTML 페이지를 로드받는다. (유저 입장에서는 빈 페이지가 보이게 된다)
 
-   ```html
-   <html>
-     <head>
-       ...
-     </head>
-     <body>
-       <div id="root">
-         <!-- 이 시점엔 내부 컨텐츠가 비어있어요. -->
-       </div>
-     </body>
-   </html>
-   ```
+```html
+<html>
+  <head>
+    ...
+  </head>
+  <body>
+    <div id="root">
+      <!-- 이 시점엔 내부 컨텐츠가 비어있어요. -->
+    </div>
+  </body>
+</html>
+```
 
 2. 로드된 HTML 페이지의 script 태그 내용 기반으로 JavaScript 번들을 불러온다.
 3. 불러온 번들을 브라우저에서 실행해 컨텐츠가 로드된다.
@@ -74,7 +74,7 @@ ogImage:
 
 - SSR + CSR
 - 유저의 첫 요청 시에만 SSR을 수행하고, **hydration 과정을 거친 후엔 CSR처럼 동작**한다.
-- hydration: 브라우저의 앱 상태를 페이지 렌더링 중 서버에서 생성한 상태와 동기화하는 작업
+- **hydration**: 브라우저의 앱 상태를 페이지 렌더링 중 서버에서 생성한 상태와 동기화하는 작업
 - 요즘 문서들에서는 SSR = Universal Rendering 으로 설명하는 케이스가 많은 것 같다.
 
 ### 동작 방식
@@ -111,7 +111,7 @@ ogImage:
 
 - Gatsby, Next.js(getStaticProps, getStaticPaths)
 
-### ISA
+### ISR
 
 - Incremental Static Regeneration
 - SSG의 기본 동작과 동일하지만, **일정 시점마다 데이터를 다시 fetch**한다.
@@ -122,12 +122,9 @@ ogImage:
 - 앱의 모든 정적 리소스를 불러와야 하는 CSR에 비해, 현재 페이지에 대한 리소스만 불러오면 되는 **SSR이 첫 번째 페이지 로드가 일반적으로 빠르다**.
 - 그러나 다른 페이지로 이동 시 SSR은 서버에서 새롭게 리소스를 불러와야 하는데, CSR은 SPA, 즉 여러 페이지처럼 보이지만 실상 하나의 앱이기 때문에 추가 리소스를 불러올 필요 없이 바로 페이지가
   렌더링된다.
-
 - **CSR에는 SEO(검색 엔진 최적화) 이슈가 존재**한다. JavaScript 분석 능력이 없는 크롤러 봇들은 초기 로딩 시 빈 HTML 컨텐츠가 로드되는 CSR 환경에서 정보를 잘 인식하지 못한다.
-
 - SSR, CSR 각각의 단점을 해소하고 장점은 챙기고 싶어 나오게 된 방식이 **Universal Rendering**이다.
-- 하지만 Universal Rendering 에도 rehydration 과정 전까지는 페이지와 상호작용할 수 없다는 단점이 존재한다.
-
+- 하지만 Universal Rendering 에도 hydration 과정 전까지는 페이지와 상호작용할 수 없다는 단점이 존재한다.
 - SSG는 첫 번째 페이지 로드 시에도, 다른 페이지로 이동 시에도 빠르다는 장점이 있지만 빌드 시점에 데이터 fetch 가 이루어지기 때문에 항상 **최신 데이터를 유지해야 하는 페이지에선 사용할 수 없다**.
 
 ## 이런 상황, 이런 방식

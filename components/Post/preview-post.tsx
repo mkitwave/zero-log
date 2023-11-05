@@ -13,7 +13,7 @@ export const PreviewPost = ({ post }: Props) => {
   return (
     <Link
       href={`/posts/${slug}`}
-      className="lg:w-1/4 lg:h-[40rem] h-[36rem] lg:min-w-[24rem] break-keep border items-center justify-between py-10 px-10 text-center border-gray-500 text-xl flex flex-col gap-y-5"
+      className="lg:h-[40rem] h-[36rem] break-keep border items-center justify-between py-10 px-10 text-center border-gray-500 text-xl flex flex-col gap-y-5"
     >
       <hr className="w-10 border-gray-500" />
       <div className="flex flex-col gap-y-2 items-center h-0 grow">
