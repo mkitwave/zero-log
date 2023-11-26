@@ -9,7 +9,7 @@ export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="fixed md:px-6 md:pt-2 px-4 w-full bg-gray-50">
+    <header className="fixed md:px-6 md:pt-2 z-10 px-4 w-full bg-gray-50">
       <div className="w-full flex border-b gap-x-4 justify-between border-gray-500 items-center md:h-20 h-16">
         <div className="md:gap-x-4 gap-x-2 flex text-lg md:text-xl items-center font-light">
           {pathname !== "/" && (
