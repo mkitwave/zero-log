@@ -1,4 +1,5 @@
 import { Box } from "./Common";
+import Link from "next/link";
 
 export const Introduction = () => {
   return (
@@ -11,7 +12,11 @@ export const Introduction = () => {
       <div className="text-lg leading-loose">
         <ul className="flex gap-y-3 flex-col">
           <li>
-            서울에서 <b>2년차 프론트엔드 개발자</b>로 일하고 있습니다.
+            서울에서 <b>2년차 프론트엔드 개발자</b>로 일하고 있습니다. (
+            <Link href="/posts/rest" className="underline font-bold">
+              현재 휴직 중
+            </Link>
+            )
             <br />
           </li>
           <li>
