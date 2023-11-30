@@ -200,12 +200,12 @@ false + true;
 // → 'l'
 ```
 
-`'f'+'a'+'i'+'l'`! 해독을 완료했다. ~~이 정도면 JS가 이상한 게 아니라 JS 개발자들이 이상한 것 같다~~ 과정이 흥미로워서 비밀 편지 생성기 같은 것을 만들어봐도 재미있을 것 같다. 개발자 간의 시크릿 토크를 할 때 사용하도록 하자.
+`'f'+'a'+'i'+'l'`! 해독을 완료했다. ~~이 정도면 JS가 이상한 게 아니라 JS 개발자들이 이상한 것 같다~~  
+[이 사이트](https://jsfuck.com/)에서 `[]()!+` 만을 이용해 영어 문장을 표현해볼 수 있다. (사이트 내의 과격한 표현 주의) 
 
 ## 참고 자료
 
 - [Why is the result of ('b'+'a'+ + 'a' + 'a').toLowerCase() 'banana'? | stackoverflow](https://stackoverflow.com/questions/57456188/why-is-the-result-of-ba-a-a-tolowercase-banana)
 - [Why is Math.max() smaller than Math.min()? | Quora](https://www.quora.com/Javascript-Why-is-Math-max-smaller-than-Math-min)
 - [What is the oddest JavaScript behavior? | dev.to](https://dev.to/ben/what-is-the-oddest-javascript-behavior-4dh2)
-- [JSFuck.com](https://jsfuck.com/)
 - [The Weird Parts of JavaScript](https://shivamv12.github.io/Weird-JS/)
