@@ -1,55 +1,48 @@
 import fs from "fs";
 import { join } from "path";
-import matter from "gray-matter";
-import { filter, map, pipe, toArray } from "@fxts/core";
+import PostType from "../interfaces/post";
+import { serialize } from "next-mdx-remote/serialize";
+import remarkGfm from "remark-gfm";
+import rehypePrettyCode from "rehype-pretty-code";
 
 const postsDirectory = join(process.cwd(), "_posts");
 
 export function getPostSlugs() {
-  return fs.readdirSync(postsDirectory);
+  return fs
+    .readdirSync(postsDirectory)
+    .map((slug) => slug.replace(/\.mdx$/, ""));
 }
 
-export function getPostBySlug(slug: string, fields: string[] = []) {
-  const realSlug = slug.replace(/\.md$/, "");
-  const fullPath = join(postsDirectory, `${realSlug}.md`);
+export const getPostSourceBySlug = async (slug: string) => {
+  const fullPath = join(postsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
-  const { data, content } = matter(fileContents);
 
-  type Items = {
-    [key: string]: string;
-  };
-
-  const items: Items = {};
-
-  // Ensure only the minimal needed data is exposed
-  fields.forEach((field) => {
-    if (field === "slug") {
-      items[field] = realSlug;
-    }
-    if (field === "content") {
-      items[field] = content;
-    }
-
-    if (typeof data[field] !== "undefined") {
-      items[field] = data[field];
-    }
+  const serializedData = await serialize(fileContents, {
+    scope: {},
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [rehypePrettyCode],
+      format: "mdx",
+    },
+    parseFrontmatter: true,
   });
 
-  return items;
-}
+  return {
+    ...serializedData,
+    post: { ...serializedData.frontmatter, slug } as PostType,
+  };
+};
 
-const a = pipe(
-  [1, 2, 3, 4, 5],
-  map((a) => a + 10),
-  filter((a) => a % 2 === 0),
-  toArray,
-);
-
-export function getAllPosts(fields: string[] = []) {
+export const getAllPosts = () => {
   const slugs = getPostSlugs();
-  const posts = slugs
-    .map((slug) => getPostBySlug(slug, fields))
-    // sort posts by date in descending order
-    .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
+
+  const posts = Promise.all(
+    slugs.map((slug) => getPostSourceBySlug(slug)),
+  ).then((sources) =>
+    sources
+      .map((source) => source.post)
+      .sort((post1, post2) => (post1.date > post2.date ? -1 : 1)),
+  );
+
   return posts;
-}
+};
