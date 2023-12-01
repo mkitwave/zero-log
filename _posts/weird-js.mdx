@@ -1,19 +1,23 @@
 ---
 title: "이상한 나라의 JS"
-excerpt: "자주 보이지는 않지만 마주치면 당황스러운 JavaScript의 수수께끼 같은 동작들을 알아보자"
-date: "2023-11-30"
+excerpt: "수수께끼 같은 동작들"
+date: "2023-12-02"
 tags:
   - JavaScript
-coverImage: "/assets/blog/school/cover.jpg"
+coverImage: "/assets/blog/weird-js/cover.jpg"
 ogImage:
-  url: "/assets/blog/school/cover.jpg"
+  url: "/assets/blog/weird-js/cover.jpg"
 ---
 
-자주 보이지는 않지만 마주치면 당황스러운 JavaScript의 수수께끼 같은 동작들을 알아보자.
+## 들어가는 글
+
+자주 보이지는 않지만 마주치면 당황스러운 JavaScript의 동작들을 알아보자.
+
+<br />
 
 ### 바NaN나
 
-```jsx
+```js
 ("b" + "a" + +"a" + "a").toLowerCase();
 // → 'banana'
 ```
@@ -26,6 +30,8 @@ ogImage:
 
 ~~제일 웃겼던 동작이다.~~
 
+<br />
+
 ### 객체지향 null
 
 ```js
@@ -34,7 +40,9 @@ typeof null;
 ```
 
 JavaScript 첫 버전부터 있었던 유명한 버그여서 그런지 mdn 공식 문서에도 [관련 내용](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/typeof#null)이 나와있다.
-기존 사이트에 대한 호환성 문제로 [ECMAScript 수정 제안](https://web.archive.org/web/20160331031419/http://wiki.ecmascript.org:80/doku.php?id=harmony:typeof_null)도 거절된 것을 확인할 수 있다.
+호환성 문제로 [ECMAScript 수정 제안](https://web.archive.org/web/20160331031419/http://wiki.ecmascript.org:80/doku.php?id=harmony:typeof_null)도 거절된 것을 확인할 수 있다.
+
+<br />
 
 ### min > max
 
@@ -52,14 +60,14 @@ Math.max();
 // → -Infinity
 ```
 
-`Infinity > -Infinity`, 당연하다. 다만 여기서 또 하나의 궁금증이 생긴다. 왜 양, 음의 무한대가 반환되는 것일까?
+`Infinity > -Infinity`인 것은 당연하다. 다만 여기서 하나의 궁금증이 생긴다. 왜 양, 음의 무한대가 반환되는 것일까?
 
 직접 `Math.min()`을 만든다고 상상해보자.
 
 ```js
 function min(arr) {
     const initialValue = ?
-    
+
     let smallestValue = initialValue;
 
     for (let i = 0; i < arr.length; i++) {
@@ -70,11 +78,13 @@ function min(arr) {
 }
 ```
 
-방식은 조금씩 다를 수 있겠지만 `arr`을 순회하며 숫자를 비교해 최솟값을 찾는 로직일 것이다. 만약 `initialValue`의 값이 `arr` 내부의 값보다 작다면 어떻게 될까?  
+방식은 조금씩 다를 수 있겠지만 `arr`을 순회하며 숫자를 비교해 최솟값을 찾는 로직일 것이다. 만약 `initialValue`의 값이 `arr` 내부의 값보다 작다면 어떻게 될까?
 
 `min` 함수의 의도와는 다르게 `arr` 중 최솟값이 아닌 `initialValue`를 반환하게 된다. 즉, `initialValue`는 JavaScript에서 다루는 값 중 가장 큰 값인 `Infinity`이어야 한다. `initialValue`가 가지는 값이 곧 인자 없이 호출된 `min()`의 반환값이 될 것이므로 `Infinity`를 반환하게 된다.
 
 `Math.max()`도 동일한 이유로 가장 작은 값인 `-Infinity`를 반환한다.
+
+<br />
 
 ### 0.30000000000000004
 
@@ -86,10 +96,11 @@ function min(arr) {
 // → 0.30000000000000004
 ```
 
-매우 유명한 부동소수점 이슈이다. 디테일한 이유를 설명하자면 알아보기 힘들 정도로 길다란 숫자 더미를 비교해가며 봐야 하므로 후속 포스팅으로 책임을 넘기겠다. 간단하게 요약하면 부동소수점 방식의 실수 표현 정밀도 문제 때문에 미세한 오차가 발생하는 것이다.
+매우 유명한 부동소수점 이슈이다. 디테일한 이유는 내용이 길어질 것 같아 따로 포스팅하겠다. 간단하게 요약하면 부동소수점 방식의 실수 표현 정밀도 문제 때문에 미세한 오차가 발생하는 것이다.
 
+<br />
 
-### parseInt라면 I’m not 신뢰에요
+### parseInt라면 I’m NaN
 
 ```js
 ["1", "7", "11"].map(parseInt);
@@ -99,7 +110,7 @@ function min(arr) {
 약간의 힌트가 필요한 수수께끼이다.
 
 ```js
-["1", "7", "11"].map((num) => (parseInt(num)))
+["1", "7", "11"].map((num) => parseInt(num));
 // → [1, 7, 11]
 ```
 
@@ -111,14 +122,15 @@ function min(arr) {
 이제 종합해볼 시간이다! `map(parseInt)`에서 `parseInt`는 `element`, `index` 값을 전달받는다. 풀어서 써보면 아래와 같다.
 
 ```js
-parseInt('1', 0); // 10진법으로 유추, 정상적으로 1 반환
+parseInt("1", 0); // 10진법으로 유추, 정상적으로 1 반환
 // → 1
-parseInt('7', 1); // `radix` 에 2-36 외의 값이 들어오면 NaN 반환
+parseInt("7", 1); // `radix` 에 2-36 외의 값이 들어오면 NaN 반환
 // → NaN
-parseInt('11', 2); // 2진법 상 11 → 2 + 1이므로 3 반환
+parseInt("11", 2); // 2진법 상 11 → 2 + 1이므로 3 반환
 // → 3
 ```
 
+<br />
 
 ### 18 - 17 = 3
 
@@ -127,8 +139,10 @@ parseInt('11', 2); // 2진법 상 11 → 2 + 1이므로 3 반환
 // → 3
 ```
 
-이 동작도 진법 때문에 발생하는 문제이다. JavaScript에서는 앞에 `0`이 붙고, `0` 이후의 숫자들이 모두 `0-7` 범위인 경우 8진수로 해석한다. `018`은 `8`이 있으니 패스, `017`은 조건을 만족하기 때문에 8진수로 해석되어 `15`로 계산된다. 즉 `18 - 15`로 계산되어 `3`이 반환된다.
+이 동작도 진법 때문에 발생하는 문제이다. JavaScript에서는 접두사로 `0`이 붙고, `0` 이후의 숫자들이 모두 `0-7` 범위인 경우 8진수로 해석한다. `018`은 `8`이 있으니 패스, `017`은 조건을 만족하기 때문에 8진수로 해석되어 `15`로 계산된다. 즉 `18 - 15`로 계산되어 `3`이 반환된다.
+Strict Mode에서는 접두사 0에 대해 금지하고 있으므로, 문법 오류가 발생한다. ([여섯째로, ECMAScript 5 에서의 엄격 모드는 8진 구문을 금지합니다. | mdn](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Strict_mode#%EC%97%84%EA%B2%A9%ED%95%9C_%EB%AA%A8%EB%93%9C_%EB%B3%80%EA%B2%BD))
 
+<br />
 
 ### 진실에 진실을 더하면
 
@@ -140,16 +154,17 @@ false + true;
 // → 1
 ```
 
-끝판왕 전 쉬어가는 느낌으로 넣어보았다. 연산 시 `true`가 `1`로 변환되고, `false`가 `0`으로 변환되어 이와 같이 동작한다.
+연산 시 `true`가 `1`로 변환되고, `false`가 `0`으로 변환되어 이와 같이 동작한다.
 
+<br />
 
 ### 비밀 편지
 
 ```js
 (![] + [])[+[]] +
-(![] + [])[+!+[]] +
-([![]] + [][[]])[+!+[] + [+[]]] +
-(![] + [])[!+[] + !+[]];
+  (![] + [])[+!+[]] +
+  ([![]] + [][[]])[+!+[] + [+[]]] +
+  (![] + [])[!+[] + !+[]];
 // → 'fail'
 ```
 
@@ -158,50 +173,58 @@ false + true;
 ```js
 // (![] + [])[+[]]
 
-![] + []
+![] + [] 
 // → 'false'
-+[]
++[];
 // → 0
 
-'false'[0]
+"false"[0];
 // → 'f'
 ```
 
 ```js
 // (![] + [])[+!+[]]
 
-+!+[] // +[]이 0이므로, !+[]은 true, +!+[]은 1
++!+[]; // +[]이 0이므로, !+[]은 true, +!+[]은 1
 // → 1
 
-'false'[1]
+"false"[1];
 // → 'a'
 ```
 
 ```js
 // ([![]] + [][[]])[+!+[] + [+[]]]
 
-
-['false'] + undefined // [![]]은 ['false'], [][[]]는 undefined
+["false"] + undefined // [![]]은 ['false'], [][[]]는 undefined
 // → 'falseundefined'
-+!+[] + [+[]] // 1 + [0]
+
+!+[] + [+[]]; // 1 + [0]
 // → '10'
 
-'falseundefined'['10']
+"falseundefined"["10"];
 // → 'i'
 ```
 
 ```js
 // (![] + [])[!+[] + !+[]]
 
-!+[] + !+[] // !+[]은 true, true + true는 2
+!+[] + !+[]; // !+[]은 true, true + true는 2
 // → 2
 
-'false'[2]
+"false"[2];
 // → 'l'
 ```
 
-`'f'+'a'+'i'+'l'`! 해독을 완료했다. ~~이 정도면 JS가 이상한 게 아니라 JS 개발자들이 이상한 것 같다~~  
-[이 사이트](https://jsfuck.com/)에서 `[]()!+` 만을 이용해 영어 문장을 표현해볼 수 있다. (사이트 내의 과격한 표현 주의) 
+`'f'+'a'+'i'+'l'`! 해독을 완료했다. [이 사이트](https://jsfuck.com/)에서 `[]()!+` 만을 이용해 여러 영어 문장을 표현해볼 수 있다. JS 개발자에게 비밀 편지를 쓰고 싶을 때 활용해보는 것은 어떨까? (사이트 내 욕설이 포함되어 있으므로 주의를 요한다.)
+
+<br />  
+
+## 후기
+JS의 이상한 동작들은 개발자 커뮤니티에서 밈으로 많이 접했었는데, 세계에서 가장 많이 사용하는 개발 언어임에도 불구하고 한눈에 이해하기 어려운 동작을 하는 이유가 뭘까 궁금했었다.
+조사하는 과정에서 JS가 [동적, 약타입 언어](https://developer.mozilla.org/ko/docs/Web/JavaScript/Data_structures#%EB%8F%99%EC%A0%81_%EB%B0%8F_%EC%95%BD%ED%83%80%EC%9E%85)로서 가지는 특징들이 무엇인지, 그로 인해 코딩 시 주의해야 하는 부분이 무엇인지 체감하게 되었다.
+추가로, 예상치 못한 동작들을 막기 위한 lint 규칙들에 대해서도 알아보고 싶다.
+
+<br />  
 
 ## 참고 자료
 
