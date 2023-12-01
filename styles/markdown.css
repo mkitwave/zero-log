@@ -1,0 +1,42 @@
+code {
+  /* gray 200 */
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  padding: 0 0.25rem;
+  margin: 0 0.1rem;
+  font-size: small;
+  counter-reset: line;
+}
+
+pre {
+  /* gray 300 */
+  border: #d1d5db 1px solid;
+  width: 100%;
+  padding: 1rem;
+  font-size: small;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+}
+
+pre > code {
+  background-color: transparent;
+}
+
+code > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1rem;
+  margin-right: 2rem;
+  text-align: right;
+  /* gray 400 */
+  color: #9ca3af;
+}
+
+code[data-line-numbers-max-digits="2"] > [data-line]::before {
+  width: 2rem;
+}
+
+code[data-line-numbers-max-digits="3"] > [data-line]::before {
+  width: 3rem;
+}

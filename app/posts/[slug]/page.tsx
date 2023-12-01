@@ -3,6 +3,7 @@ import { BLOG_TITLE } from "../../../lib/constants";
 import Head from "next/head";
 import { CoverImage, DateFormatter } from "../../../components/Common";
 import { Markdown } from "../../../components/Post";
+import "../../../styles/markdown.css";
 
 type Props = {
   params: { slug: string };

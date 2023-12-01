@@ -21,7 +21,15 @@ export const getPostSourceBySlug = async (slug: string) => {
     scope: {},
     mdxOptions: {
       remarkPlugins: [remarkGfm],
-      rehypePlugins: [rehypePrettyCode],
+      rehypePlugins: [
+        [
+          rehypePrettyCode,
+          {
+            theme: "solarized-light",
+            keepBackground: false,
+          },
+        ],
+      ],
       format: "mdx",
     },
     parseFrontmatter: true,
