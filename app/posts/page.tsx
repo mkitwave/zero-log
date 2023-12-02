@@ -3,6 +3,10 @@ import Head from "next/head";
 import { BLOG_TITLE } from "../../lib/constants";
 import { PreviewPostList } from "../../components/Post";
 
+export const metadata = {
+  title: `Posts`,
+};
+
 export default async function Posts() {
   const allPosts = await getAllPosts();
 
