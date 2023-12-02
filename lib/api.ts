@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
 
 const postsDirectory = join(process.cwd(), "_posts");
+const themePath = join(process.cwd(), "lib/shiki/theme/solarized-light.json");
 
 export function getPostSlugs() {
   return fs
@@ -26,9 +27,7 @@ export const getPostSourceBySlug = async (slug: string) => {
           // @ts-ignore @TODO rehype-pretty-code 의존성 오류
           rehypePrettyCode,
           {
-            theme: JSON.parse(
-              fs.readFileSync("lib/shiki/theme/solarized-light.json", "utf-8"),
-            ),
+            theme: JSON.parse(fs.readFileSync(themePath, "utf-8")),
             keepBackground: false,
           },
         ],
