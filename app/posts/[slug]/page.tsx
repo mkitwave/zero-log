@@ -4,6 +4,7 @@ import Head from "next/head";
 import { CoverImage, DateFormatter } from "../../../components/Common";
 import { Markdown } from "../../../components/Post";
 import "../../../styles/markdown.css";
+import { Comment } from "../../../components/Post/Comment";
 
 type Props = {
   params: { slug: string };
@@ -33,7 +34,10 @@ export default async function PostPage({ params: { slug } }: Props) {
           <CoverImage title={title} src={post.coverImage} />
         </div>
         <div className="w-[65rem] max-w-full">
-          <Markdown source={source} />
+          <div className="w-[65rem] max-w-full">
+            <Markdown source={source} />
+            <Comment /> {/* Render the Comment component */}
+          </div>
         </div>
       </div>
     </article>
