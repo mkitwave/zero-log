@@ -23,6 +23,7 @@ export const getPostSourceBySlug = async (slug: string) => {
       remarkPlugins: [remarkGfm],
       rehypePlugins: [
         [
+          // @ts-ignore @TODO rehype-pretty-code 의존성 오류
           rehypePrettyCode,
           {
             theme: "solarized-light",
