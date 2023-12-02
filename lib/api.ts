@@ -4,6 +4,7 @@ import PostType from "../interfaces/post";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
+import { getHighlighter } from "shiki";
 
 const postsDirectory = join(process.cwd(), "_posts");
 const themePath = join(process.cwd(), "lib/shiki/theme/solarized-light.json");
@@ -27,7 +28,7 @@ export const getPostSourceBySlug = async (slug: string) => {
           // @ts-ignore @TODO rehype-pretty-code 의존성 오류
           rehypePrettyCode,
           {
-            theme: JSON.parse(fs.readFileSync(themePath, "utf-8")),
+            theme: "solarized-light",
             keepBackground: false,
           },
         ],
