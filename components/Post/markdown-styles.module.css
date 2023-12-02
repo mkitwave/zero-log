@@ -1,45 +1,45 @@
 .markdown {
-    @apply text-lg leading-loose;
+  @apply text-lg leading-loose;
 }
 
 .markdown ul,
 .markdown ol,
 .markdown blockquote {
-    @apply my-6;
+  @apply my-6;
 }
 
 .markdown h2 {
-    @apply text-3xl mt-12 mb-4 leading-snug font-medium;
+  @apply text-3xl mt-12 mb-4 leading-snug font-medium;
 }
 
 .markdown h3 {
-    @apply text-2xl mt-8 mb-4 leading-snug;
+  @apply text-2xl mt-8 mb-4 leading-snug;
 }
 
 .markdown code {
-    @apply bg-gray-200 rounded-lg break-all px-1
+  @apply bg-gray-200 rounded-lg break-all px-1;
 }
 
 .markdown pre {
-    @apply bg-gray-200 break-all w-full p-4 rounded-xl overflow-x-scroll
+  @apply bg-gray-200 break-all w-full p-4 rounded-xl overflow-x-scroll my-2;
 }
 
 .markdown pre > code {
-    @apply bg-transparent
+  @apply bg-transparent;
 }
 
 .markdown b {
-    @apply font-bold
+  @apply font-bold;
 }
 
 .markdown a {
-    @apply underline
+  @apply underline;
 }
 
 .markdown ol {
-    @apply list-decimal list-inside
+  @apply list-decimal list-inside;
 }
 
 .markdown ul {
-    @apply list-disc list-inside
+  @apply list-disc list-inside;
 }
