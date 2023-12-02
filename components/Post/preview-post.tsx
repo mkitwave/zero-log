@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const PreviewPost = ({ post }: Props) => {
-  const { slug, title, excerpt, coverImage, tags, date, content } = post;
+  const { slug, title, excerpt, coverImage, tags, date } = post;
 
   return (
     <Link

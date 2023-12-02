@@ -1,5 +1,4 @@
 import Meta from "../Common/meta";
-import { usePathname } from "next/navigation";
 import { Header } from "./header";
 
 type Props = {
@@ -7,8 +6,6 @@ type Props = {
 };
 
 const Layout = ({ children }: Props) => {
-  const pathname = usePathname();
-
   return (
     <>
       <Meta />
