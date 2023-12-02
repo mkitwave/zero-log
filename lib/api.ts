@@ -26,7 +26,9 @@ export const getPostSourceBySlug = async (slug: string) => {
           // @ts-ignore @TODO rehype-pretty-code 의존성 오류
           rehypePrettyCode,
           {
-            theme: "solarized-light",
+            theme: JSON.parse(
+              fs.readFileSync("lib/shiki/theme/solarized-light.json", "utf-8"),
+            ),
             keepBackground: false,
           },
         ],
