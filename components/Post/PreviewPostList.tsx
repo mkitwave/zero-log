@@ -30,7 +30,7 @@ export const PreviewPostList = ({ posts }: Props) => {
   return (
     <div className="flex flex-col h-full w-full py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:grid-cols-3 w-full pb-10">
-        <div className="lg:h-[20rem] h-[5rem] rounded text-xl">
+        <div className="lg:h-[20rem] rounded text-xl">
           {tags.map((tag) => (
             <button
               key={tag}
