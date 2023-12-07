@@ -18,6 +18,13 @@ export const Education = () => (
         학습하였으며 졸업 전시, 교내 어워드 등에서 다양한 팀 프로젝트를 경험한
         바 있습니다.
       </p>
+      <a
+        href="https://www.notion.so/Portfolio-School-2101c4caf0fe48f0a25e224e8b9c06d6?pvs=4"
+        target="_blank"
+        className="underline"
+      >
+        교내 프로젝트 포트폴리오
+      </a>
     </div>
   </Box>
 );

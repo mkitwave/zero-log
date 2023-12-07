@@ -3,6 +3,9 @@ module.exports = {
   content: ["./components/**/*.tsx", "./app/**/*.tsx"],
   theme: {
     extend: {
+      listStyleType: {
+        square: "square",
+      },
       colors: {
         "accent-1": "#FAFAFA",
         "accent-2": "#EAEAEA",

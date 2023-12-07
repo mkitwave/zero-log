@@ -1,8 +1,8 @@
 import {
-  Contact,
   Education,
   Introduction,
   Projects,
+  Skills,
   Work,
 } from "../../components/Resume";
 
@@ -17,9 +17,9 @@ export default function Resume() {
       <div className="flex flex-col gap-y-16 md:w-[56rem] w-full h-full text-start items-center">
         <Introduction />
         <Work />
+        <Skills />
         <Projects />
         <Education />
-        <Contact />
       </div>
     </article>
   );
