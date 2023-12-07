@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 @media screen and (max-width: 1440px) and (min-width: 1360px) {
-    html {
-        font-size: 1.1111vw;
-    }
+  html {
+    font-size: 1.1111vw;
+  }
 }
 
 @media screen and (max-width: 1360px) and (min-width: 560px) {
-    html {
-        font-size: 1.1765vw;
-    }
+  html {
+    font-size: 1.1765vw;
+  }
 }
 
 @media screen and (max-width: 560px) and (orientation: portrait) {
-    html {
-        font-size: 16px;
-    }
+  html {
+    font-size: 16px;
+  }
 }
