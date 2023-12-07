@@ -63,13 +63,16 @@ export const Project = ({
           <li key={index} className="flex flex-col gap-y-2">
             <h5 className="font-semibold text-lg">{title}</h5>
             <ul className="list-inside list-disc leading-relaxed gap-y-2 flex flex-col">
-              {descriptions.map((description) =>
+              {descriptions.map((description, index) =>
                 typeof description === "string" ? (
-                  <li>{description}</li>
+                  <li key={index}>{description}</li>
                 ) : (
-                  <ul className="pl-6 list-inside list-square flex flex-col gap-y-1">
+                  <ul
+                    key={index}
+                    className="pl-6 list-inside list-square flex flex-col gap-y-1"
+                  >
                     {description.map((detailedDescription) => (
-                      <li>{detailedDescription}</li>
+                      <li key={detailedDescription}>{detailedDescription}</li>
                     ))}
                   </ul>
                 ),

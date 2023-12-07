@@ -29,7 +29,7 @@ export const Introduction = () => {
             url: "https://www.linkedin.com/in/%EC%98%88%EC%84%9C-%EC%9D%B4-9b0a3a213/",
           },
         ].map(({ name, url }) => (
-          <>
+          <div key={name}>
             <a
               key={name}
               target="_blank"
@@ -39,7 +39,7 @@ export const Introduction = () => {
               {name}
             </a>
             <span className="last:hidden">|</span>
-          </>
+          </div>
         ))}
       </div>
     </Box>
