@@ -3,12 +3,10 @@ import { join } from "path";
 import PostType from "../interfaces/post";
 import { serialize } from "next-mdx-remote/serialize";
 import remarkGfm from "remark-gfm";
-import rehypeCode, { Options as RehypeCodeOptions } from "rehype-pretty-code";
-import { noop } from "@fxts/core";
-import * as shiki from "shiki";
+import rehypeCode from "rehype-pretty-code";
+import { getShikiHighlighter } from "./shiki/getShikiHighlighter";
 
 const postsDirectory = join(process.cwd(), "_posts");
-const shikiDirectory = join(process.cwd(), "lib/shiki");
 
 export function getPostSlugs() {
   return fs
@@ -16,34 +14,17 @@ export function getPostSlugs() {
     .map((slug) => slug.replace(/\.mdx$/, ""));
 }
 
-const touched = { current: false };
-
-const touchShikiPath = (): void => {
-  if (touched.current) return;
-  fs.readdir(shikiDirectory, noop);
-  touched.current = true;
-};
-
-const getHighlighter: RehypeCodeOptions["getHighlighter"] = async (options) => {
-  touchShikiPath();
-
-  const highlighter = await shiki.getHighlighter({
-    ...(options as any),
-    paths: {
-      languages: `${shikiDirectory}/languages/`,
-      themes: `${shikiDirectory}/themes/`,
-    },
-  });
-
-  return highlighter;
-};
-
-export const getPostSourceBySlug = async (slug: string) => {
+const getPostRawSourceBySlug = (slug: string) => {
   const fullPath = join(postsDirectory, `${slug}.mdx`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
 
+  return fileContents;
+};
+
+export const getPostSourceBySlug = async (slug: string) => {
+  const fileContents = getPostRawSourceBySlug(slug);
+
   const serializedData = await serialize(fileContents, {
-    scope: {},
     mdxOptions: {
       remarkPlugins: [remarkGfm],
       rehypePlugins: [
@@ -52,7 +33,7 @@ export const getPostSourceBySlug = async (slug: string) => {
           rehypeCode,
           {
             theme: "solarized-light",
-            getHighlighter,
+            getHighlighter: getShikiHighlighter,
             keepBackground: false,
           },
         ],
@@ -68,15 +49,23 @@ export const getPostSourceBySlug = async (slug: string) => {
   };
 };
 
+const getPostFrontmatterBySlug = async (slug: string) => {
+  const fileContents = getPostRawSourceBySlug(slug);
+
+  const serializedData = await serialize(fileContents, {
+    parseFrontmatter: true,
+  });
+
+  return { ...serializedData.frontmatter, slug } as PostType;
+};
+
 export const getAllPosts = () => {
   const slugs = getPostSlugs();
 
   const posts = Promise.all(
-    slugs.map((slug) => getPostSourceBySlug(slug)),
+    slugs.map((slug) => getPostFrontmatterBySlug(slug)),
   ).then((sources) =>
-    sources
-      .map((source) => source.post)
-      .sort((post1, post2) => (post1.date > post2.date ? -1 : 1)),
+    sources.sort((post1, post2) => (post1.date > post2.date ? -1 : 1)),
   );
 
   return posts;
