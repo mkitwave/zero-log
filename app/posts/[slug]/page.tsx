@@ -1,4 +1,4 @@
-import { getPostSourceBySlug } from "../../../lib/api";
+import { getPostSlugs, getPostSourceBySlug } from "../../../lib/api";
 import { CoverImage, DateFormatter } from "../../../components/Common";
 import { Markdown } from "../../../components/Post";
 import "../../../styles/markdown.css";
@@ -30,6 +30,10 @@ export async function generateMetadata({
     openGraph: defaultMetadata,
     twitter: defaultMetadata,
   };
+}
+
+export async function generateStaticParams() {
+  return getPostSlugs().map((slug) => ({ slug }));
 }
 
 export default async function PostPage({ params: { slug } }: Props) {
