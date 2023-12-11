@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
 import { getPostSourceBySlug } from "../../lib/api";
 
@@ -9,7 +10,7 @@ type Props = {
 
 export const Markdown = ({ source }: Props) => {
   return (
-    <article className="leading-loose flex flex-col gap-y-3 w-full">
+    <article className="leading-loose flex flex-col gap-y-3 w-full pb-20">
       <MDXRemote
         {...source}
         components={{
@@ -35,10 +36,23 @@ export const Markdown = ({ source }: Props) => {
             <a
               target="_blank"
               href={href}
-              className="text-blue-500 hover:text-blue-600 hover:underline"
+              className="inline text-blue-500 hover:text-blue-600 hover:underline"
             >
               {children}
             </a>
+          ),
+
+          // Image
+          img: ({ src, alt }) => (
+            <div className="w-full flex justify-center py-6">
+              <Image
+                src={src ?? ""}
+                alt={alt ?? ""}
+                width={800}
+                height={400}
+                className="w-[70%] rounded-lg shadow-md"
+              />
+            </div>
           ),
 
           // Code / Pre 에 대한 스타일링은 markdown.css 에 정의
