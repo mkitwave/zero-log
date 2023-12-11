@@ -50,7 +50,7 @@ export const Markdown = ({ source }: Props) => {
                 alt={alt ?? ""}
                 width={800}
                 height={400}
-                className="w-[70%] rounded-lg shadow-md"
+                className="w-full md:w-[70%] rounded-lg shadow-md"
               />
             </div>
           ),
