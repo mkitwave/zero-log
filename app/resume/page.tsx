@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function Resume() {
   return (
-    <article className="md:p-10 p-5 w-full flex justify-center">
+    <article className="md:py-10 py-5 w-full flex justify-center">
       <div className="flex flex-col gap-y-16 md:w-[56rem] w-full h-full text-start items-center">
         <Introduction />
         <Work />
