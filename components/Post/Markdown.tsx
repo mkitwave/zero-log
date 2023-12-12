@@ -55,6 +55,12 @@ export const Markdown = ({ source }: Props) => {
             </div>
           ),
 
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-black pl-4">
+              {children}
+            </blockquote>
+          ),
+
           // Code / Pre 에 대한 스타일링은 markdown.css 에 정의
         }}
       />
