@@ -1,0 +1,545 @@
+---
+title: "(번역) Let’s learn how modern JavaScript frameworks work by building one"
+excerpt: "만들며 배우는 최신 자바스크립트 프레임워크의 동작 원리"
+date: "2023-12-12"
+tags:
+  - "JavaScript"
+coverImage: "/assets/blog/lets-learn-how-modern-js-frameworks-work-by-building-one/cover.png"
+ogImage:
+  url: "/assets/blog/lets-learn-how-modern-js-frameworks-work-by-building-one/cover.png"
+---
+
+## 역자의 말
+
+**만들며 배우는 최신 자바스크립트 프레임워크의 동작 원리**([원문](https://nolanlawson.com/2023/12/02/lets-learn-how-modern-javascript-frameworks-work-by-building-one))를 번역한 글이다. React 이후에 등장한 프레임워크들(Lit, Solid, …)의 차별점과, 동작 원리를 이해하기 위해 직접 프레임워크를 만들어보는 예제를 제공한다.
+
+추천하는 선행 지식은 다음과 같다.
+
+- [signals](https://junghan92.medium.com/%EB%B2%88%EC%97%AD-%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8-signal%EC%9D%98-%EC%A7%84%ED%99%94-4bd6a991d2f)
+- [`<template>`](https://developer.mozilla.org/ko/docs/Web/HTML/Element/template)
+- [Proxy](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+- [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide)
+  <br />
+
+---
+
+<br />
+저는 직업으로 JavaScript 프레임워크([LWC](https://lwc.dev/))를 개발하고 있습니다.
+프레임워크를 약 3년 정도 개발했지만, 여전히 딜레마에 빠진 기분이 듭니다. 더 큰 프레임워크
+세계에서 무슨 일이 일어나고 있는지에 대해 읽을 때면 모르는 것들이 너무 많아서 압도당할
+때가 많습니다.
+
+무엇이 어떻게 작동하는지 배우는 가장 좋은 방법 중 하나는 직접 구축하는 것입니다. "[n일간 JavaScript 프레임워크를 사용하지 않았다](https://dayssincelastjavascriptframework.com/)" 밈을 유지해야 되기도 합니다. 그러므로, 우리만의 최신 JavaScript 프레임워크를 직접 작성해 봅시다!
+
+## "최신 JavaScript 프레임워크"란 무엇인가요?
+
+React는 훌륭한 프레임워크이며, 이 글에서는 React에 대해 상세하게 설명하지 않겠습니다. 이 글의 목적상 '최신 JavaScript 프레임워크'는 'React 이후의 프레임워크', 즉 [Lit](https://lit.dev/), [Solid](https://www.solidjs.com/), [Svelte](https://svelte.dev/), [Vue](https://vuejs.org/) 등을 의미합니다.
+
+React는 오랫동안 프론트엔드 생태계를 지배해 왔기 때문에, 모든 최신 프레임워크가 React의 그늘에서 성장해 왔습니다. 이러한 프레임워크들은 React에서 많은 영감을 받았음에도 서로 유사한 방식으로 진화했습니다. React 자체적으로도 혁신을 거듭해왔지만, 요즘에는 React 이후의 프레임워크가 React보다 서로 더 비슷하다고 느껴집니다.
+
+간단하게 설명하기 위해 [Astro](https://astro.build/), [Marko](https://markojs.com/), [Qwik](https://qwik.builder.io/docs/)과 같은 서버 우선 프레임워크에 대해서는 언급하지 않겠습니다. 이러한 프레임워크들은 훌륭하지만 클라이언트 중심 프레임워크와는 약간 다른 포인트에서 기인되었습니다. 따라서 이 글에서는 클라이언트 측 렌더링에 대해서만 이야기해 보겠습니다.
+
+## 최신 프레임워크의 차별점은 무엇인가요?
+
+제 생각에, React 이후의 프레임워크는 모두 동일한 기본 아이디어로 수렴됩니다.
+
+1. DOM 업데이트에 반응성(ex: [signals](https://dev.to/this-is-learning/the-evolution-of-signals-in-javascript-8ob))을 사용합니다.
+2. DOM 렌더링에 복제된 템플릿을 사용합니다.
+3. 위의 작업들을 더 쉽게 만들어주는 `<template>` , `Proxy`와 같은 최신 웹 API를 사용합니다.
+
+미세하게 살펴보면 각 프레임워크별로 웹 컴포넌트, 컴파일, API 등을 처리하는 방식에 많은 차이가 있습니다. [모든 프레임워크가 `Proxy`를 사용하는 것은 아닙니다.](https://github.com/sveltejs/svelte/issues/2626#issuecomment-489894747) 그러나 대부분의 프레임워크 제작자는 위의 아이디어에 동의하거나 위의 방향으로 나아가고 있는 것으로 보입니다.
+
+따라서 우리가 만들어볼 프레임워크에선, 이 아이디어를 구현하기 위한 최소한의 작업을 해보겠습니다. 반응성부터 시작해볼까요?
+
+## 반응성
+
+흔히 ["React는 반응형이 아니다"](https://dev.to/this-is-learning/how-react-isn-t-reactive-and-why-you-shouldn-t-care-152m)라고 말합니다. 이 말은 React가 push 기반이 아니라 pull 기반 모델을 사용한다는 뜻입니다. 과하게 일반화해보자면, 최악의 경우 React는 전체 가상 DOM 트리를 처음부터 다시 빌드해야 하고, 이 업데이트를 방지하는 유일한 방법은 `React.memo`(이전엔 `shouldComponentUpdate`)를 구현하는 것입니다.
+
+가상 DOM을 사용하면 '다 날려버리고 처음부터 다시 시작하기' 전략의 비용을 조금 줄일 수 있지만, 문제를 완전히 해결하지는 않습니다. 또한 개발자에게 올바른 memo 코드를 작성하라고 요구되는 것은 좋지 않습니다. (이 문제를 해결하기 위한 시도는 [React Forget](https://react.dev/blog/2023/03/22/react-labs-what-we-have-been-working-on-march-2023)을 참조하세요.)
+
+대신에, 최신 프레임워크는 push 기반 반응형 모델을 사용합니다. 이 모델에서는 컴포넌트 트리의 개별 부분이 상태 업데이트를 구독하고, 관련된 상태가 변경될 때만 DOM을 업데이트합니다. 이 모델은 어떤 상태가 UI의 어떤 부분에 연결되어 있는지 추적하기 위해 약간의 사전 관리 비용(특히 메모리 측면)을 지불하는 대신 '기본적으로 성능이 뛰어난' 디자인을 우선시합니다.
+
+이 기법이 항상 가상 DOM 접근 방식과 호환되지 않는 것은 아닙니다. [Preact Signals](https://preactjs.com/guide/v10/signals/)나 [Million](https://million.dev/)과 같은 도구들은 하이브리드 시스템을 사용할 수 있음을 보여줍니다. 이 방법은 기존의 가상 DOM 프레임워크(ex: React)를 유지하되, 성능에 민감한 상황에 push 기반 모델을 선택적으로 적용하고자 할 때 유용합니다.
+
+이 글에서는 signals에 대한 자세한 설명이나 [세분화된 반응성](https://dev.to/ryansolid/a-hands-on-introduction-to-fine-grained-reactivity-3ndf)과 같은 주제를 다루지는 않겠지만, 반응형 시스템을 사용한다고 가정하겠습니다.
+
+> **참고**: 무엇이 '반응형'에 해당하는지에 대해 이야기할 때는 [많은 뉘앙스](https://news.ycombinator.com/item?id=38512412)가 있습니다. 여기서는 React를 React 이후의 프레임워크, 특히 Solid, ["runes" 모드](https://svelte.dev/blog/runes)의 Svelte v5, [Vue Vapor](https://github.com/vuejs/core-vapor)와 대조하는 것이 목표입니다.
+
+## DOM 트리 복제
+
+이전에, JavaScript 프레임워크에서 DOM을 렌더링하는 가장 빠른 방법은 각 DOM 노드를 개별적으로 생성하고 마운트하는 것이라는 통념이 있었습니다. `createElement`, `setAttribute`, `textContent`와 같은 API를 사용하여 DOM을 하나씩 빌드하는 것입니다.
+
+```jsx
+const div = document.createElement("div");
+div.setAttribute("class", "blue");
+div.textContent = "Blue!";
+```
+
+이 방식의 대안은 큰 단위의 HTML 문자열을 `innerHTML`에 포함시키고, 브라우저가 이를 구문 분석하도록 하는 것입니다.
+
+```jsx
+const container = document.createElement("div");
+container.innerHTML = `
+  <div class="blue">Blue!</div>
+`;
+```
+
+이 낙관적인 방식에는 큰 단점이 있습니다. HTML에 동적 콘텐츠(예: `blue` 대신 `red`)가 있는 경우 HTML 문자열을 반복해서 파싱해야 한다는 것입니다. 또한 업데이트할 때마다 DOM을 날려버리기 때문에 `<input>` 의 `value`와 같은 상태들이 초기화될 수 있습니다.
+
+> 참고: innerHTML을 사용하면 [보안에도 영향을 미칩니다.](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML#replacing_the_contents_of_an_element) 하지만 이 글의 목적상 HTML 콘텐츠를 신뢰한다고 가정해 보겠습니다.
+
+어느 순간, 사람들은 HTML을 한 번 파싱한 다음 전체에 대해 `cloneNode(true)`를 호출하는 방식이 매우 빠르다는 사실을 알아챘습니다.
+
+```jsx
+const template = document.createElement("template");
+template.innerHTML = `
+  <div class="blue">Blue!</div>
+`;
+template.content.cloneNode(true); // 빨라요!
+```
+
+위의 코드는 [`<template>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) 태그를 사용하고 있는데요, 이 태그는 '비활성' DOM을 생성한다는 장점이 있습니다. 즉, `<img>`나 `<video autoplay>`과 같은 태그들이 자동으로 소스를 다운로드하지 않습니다.
+
+수동 DOM API와 비교했을 때 얼마나 빠를까요? 증명하기 위해 [간단한 벤치마크](https://github.com/nolanlawson/template-clone-demo)를 소개합니다. [Tachometer](https://github.com/google/tachometer)에 따르면 위의 방식은 Chrome에서 약 50%, Firefox에서 15%, Safari에서 10% 더 빠른 것으로 나타났습니다. (이 수치는 DOM의 크기와 이터레이션 횟수에 따라 달라지지만, 별개로 요점은 알 수 있습니다.)
+
+흥미로운 점은 `<template>` 태그가 IE11에서는 사용할 수 없는 새로운 브라우저 API이며, 원래 웹 컴포넌트를 위해 설계되었다는 점입니다. 아이러니하게도 이 API는 웹 컴포넌트 사용 여부와 관계없이 다양한 자바스크립트 프레임워크에서 사용되고 있습니다.
+
+> **참고**: [Solid](https://github.com/ryansolid/dom-expressions/blob/998e60384e31dc335290299e78f19e995f828b07/packages/dom-expressions/src/client.js#L75), [Vue Vapor](https://github.com/vuejs/core-vapor/blob/42d2f3dd9876c1c5f898c6507df1a845c7045d35/packages/runtime-dom/src/nodeOps.ts#L68) 및 [Svelte v5](https://github.com/sveltejs/svelte/blob/7f237c2e41115b420f0d6432c51c85ec3b5ecaf5/packages/svelte/src/internal/client/reconciler.js#L101)의 `<template>`에서 `cloneNode`를 사용한 예시입니다.
+
+이 기술에는 DOM 상태를 날리지 않고 동적 콘텐츠를 효율적으로 업데이트해야 하는 과제가 있습니다. 이 과제는 나중에 예제 프레임워크를 구축할 때 다루겠습니다.
+
+## 최신 JavaScript API
+
+유용하고 새로운 API `<template>`을 알아보았습니다. 주목받는 다른 API는, 반응형 시스템을 훨씬 더 간단하게 구축할 수 있는 `Proxy`입니다.
+
+예제 프레임워크를 만들 때 [tagged template literal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)을 사용하여 이와 같은 API를 만들어볼 것입니다:
+
+```jsx
+const dom = html` <div>Hello ${name}!</div> `;
+```
+
+모든 프레임워크가 이를 사용하는 것은 아니지만, 주목할 만한 프레임워크에는 Lit, [HyperHTML](https://viperhtml.js.org/hyper.html), [ArrowJS](https://www.arrow-js.com/) 등이 있습니다. tagged template literal을 사용하면 컴파일러 없이도 인체공학적인 HTML 템플릿 API를 간단하게 구축할 수 있습니다.
+
+## 예제 프레임워크 만들어보기
+
+### 1. 반응성 구축
+
+반응성은 프레임워크를 구축하는 기반입니다. 반응성은 상태가 관리되는 방식과 상태가 변경될 때 DOM이 업데이트되는 방식을 정의합니다.
+
+설명을 돕기 위해, ['꿈의 코드'](https://nobackend.org/2013/05/welcome-to-noBackend.html) 몇 줄로 시작해 보겠습니다.
+
+```jsx
+const state = {};
+
+state.a = 1;
+state.b = 2;
+
+createEffect(() => {
+  state.sum = state.a + state.b;
+});
+```
+
+기본적으로 '마법의 객체' `state` 가 있고, 속성 `a` , `b`가 있으며, 이 속성들이 변경될 때마다 `sum`이 두 속성의 합이 되도록 구현하고 싶습니다.
+
+속성을 미리 알지 못한다고 가정하면(또는 컴파일러가 속성을 결정할 수 있다고 가정하면) 일반 객체만으로는 충분하지 않습니다. 따라서, 새로운 값이 설정될 때마다 반응할 수 있는 `Proxy`를 사용해 보겠습니다.
+
+```jsx
+const state = new Proxy(
+  {},
+  {
+    get(obj, prop) {
+      onGet(prop);
+      return obj[prop];
+    },
+    set(obj, prop, value) {
+      obj[prop] = value;
+      onSet(prop, value);
+      return true;
+    },
+  },
+);
+```
+
+현재 `Proxy`는 `onGet`과 `onSet` 훅을 제공하는 것 외의 기능이 없습니다. 이제 microtask 후에 업데이트를 flush하도록 만들어 봅시다.
+
+```jsx
+let queued = false;
+
+function onSet(prop, value) {
+  if (!queued) {
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      flush();
+    });
+  }
+}
+```
+
+> 참고: [`queueMicrotask`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask)는 기본적으로 `Promise.resolve().then(...)`과 동일하지만 더 적은 코드로 작성 가능한 최신 DOM API입니다.
+
+업데이트를 flush하는 가장 큰 이유는, 너무 많은 계산을 실행하고 싶지 않기 때문입니다. `a`와 `b`가 모두 변경될 때마다 업데이트하면 의미없이 `sum`을 두 번 계산하게 됩니다. flush를 하나의 microtask로 통합하면 훨씬 더 효율적으로 작업할 수 있습니다.
+
+다음으로, sum을 업데이트하는 `flush` 함수를 만들어 보겠습니다.
+
+```jsx
+function flush() {
+  state.sum = state.a + state.b;
+}
+```
+
+훌륭하지만, 아직 ‘꿈의 코드’는 아닙니다. `a`와 `b`가 변경될 때만 `sum`이 계산되도록, `createEffect`를 구현해야 합니다. (다른 요소가 변경될 때는 계산되지 않도록!)
+
+객체를 사용하여 어떤 속성에 어떤 effect를 실행해야 하는지 추적해 보겠습니다.
+
+```jsx
+const propsToEffects = {};
+```
+
+이제 중요한 부분입니다! effect가 올바른 속성을 구독하는지 확인해야 합니다. effect를 실행하고, effect의 모든 `get` 호출을 기록하고, 속성과 effect 간의 매핑을 생성합니다.
+
+해답을 찾으려면, '꿈의 코드'를 떠올려보세요.
+
+```jsx
+createEffect(() => {
+  state.sum = state.a + state.b;
+});
+```
+
+이 함수가 실행되면 `state.a`와 `state.b`라는 두 개의 getter를 호출합니다. 이 getter는 함수가 두 개의 속성에 의존한다는 것을 반응형 시스템이 알아차리도록 트리거해야 합니다.
+
+'현재' effect가 무엇인지 추적하기 위해 간단한 전역 변수를 작성해보겠습니다.
+
+```jsx
+let currentEffect;
+```
+
+`createEffect` 함수는 effect를 호출하기 전에, effect를 `currentEffect`으로 설정합니다.
+
+```jsx
+function createEffect(effect) {
+  currentEffect = effect;
+  effect();
+  currentEffect = undefined;
+}
+```
+
+여기서 중요한 점은, effect가 즉시 호출되며 전역 `currentEffect`가 미리 설정되어 있다는 것입니다. 이로 인해 호출될 모든 getter를 추적할 수 있게 되었습니다.
+
+이제 `Proxy`에서 `onGet`을 구현하여 전역 `currentEffect`와 속성 간의 매핑을 설정해봅시다.
+
+```jsx
+function onGet(prop) {
+  const effects = propsToEffects[prop] ?? (propsToEffects[prop] = []);
+  effects.push(currentEffect);
+}
+```
+
+위의 코드가 한 번 실행되면, `propsToEffects`는 다음과 같을 것입니다.
+
+```jsx
+{
+  "a": [theEffect],
+  "b": [theEffect]
+}
+```
+
+여기서 `theEffect`는 실행하고자 하는 'sum' 함수입니다.
+
+다음으로, `onSet`은 실행해야 하는 모든 effect를 `dirtyEffects` 배열에 추가합니다.
+
+```jsx
+const dirtyEffects = [];
+
+function onSet(prop, value) {
+  if (propsToEffects[prop]) {
+    dirtyEffects.push(...propsToEffects[prop]);
+    // ...
+  }
+}
+```
+
+이제 모든 `dirtyEffects`를 `flush` 할 준비가 되었습니다.
+
+```jsx
+function flush() {
+  while (dirtyEffects.length) {
+    dirtyEffects.shift()();
+  }
+}
+```
+
+모든 코드를 종합하면, 이제 완전한 기능을 갖춘 반응성 시스템이 생겼습니다! 개발자 도구 콘솔에서 `state.a`와 `state.b`를 설정하여 직접 사용해 볼 수 있으며, 둘 중 하나가 변경될 때마다 `state.sum`이 업데이트됩니다.
+
+([Codepen](https://codepen.io/nolanlawson-the-selector/pen/qBgKywJ))
+
+아래는 이 예제에서 다루지 않은 심화 과제들입니다.
+
+1. effect가 오류를 발생시킬 경우 `try`/`catch` 사용
+2. 같은 effect에 대한 중복 실행 방지
+3. 무한 cycle 방지
+4. 후속 실행 시 새 속성에 대한 effect 구독(예: 특정 getter가 `if` 블록에서만 호출되는 경우)
+
+하지만 예제 프레임워크에서는 이것으로 충분합니다. DOM 렌더링으로 넘어가 보겠습니다.
+
+### 2. DOM 렌더링
+
+기능적인 반응성 시스템을 갖추었지만, 아직은 ‘헤드리스’에 불과합니다. 변경 사항을 추적하고 effect를 계산할 수는 있지만 그게 전부입니다.
+
+JavaScript 프레임워크는 DOM을 화면에 렌더링해야 합니다. (이것이 핵심입니다.)
+
+이 단락에서는 반응성은 잠시 잊어버리고, 1) DOM 트리를 만들고 2) 효율적으로 업데이트할 수 있는 함수를 만들어봅시다.
+
+다시 ‘꿈의 코드’부터 시작해 보겠습니다:
+
+```jsx
+function render(state) {
+  return html` <div class="${state.color}">${state.text}</div> `;
+}
+```
+
+앞서 언급했듯이, tagged template literal을 사용하는 이유는 컴파일러 없이도 HTML 템플릿을 작성할 수 있는 좋은 방법이기 때문입니다. (왜 컴파일러를 대신해야 하는지는 잠시 후에 살펴보겠습니다.)
+
+이번에는 `color`와 `text` 속성이 있는 `state` 객체를 사용하겠습니다.
+
+```jsx
+state.color = "blue";
+state.text = "Blue!";
+```
+
+`state`를 `render`에 전달하면 `state`가 적용된 DOM 트리를 반환해야 합니다.
+
+```jsx
+<div class="blue">Blue!</div>
+```
+
+더 나아가기 전, tagged template literal에 대한 간단한 기본기가 필요합니다. `html` 태그는 `tokens`(정적 HTML 문자열 배열)와 `expressions`(평가된 동적 표현식)이라는 두 가지 인수를 받는 함수입니다.
+
+```jsx
+function html(tokens, ...expressions) {}
+```
+
+위의 경우 `tokens` 는 다음과 같습니다.
+
+```jsx
+['<div class="', '">', "</div>"];
+```
+
+그리고 `expressions`은 다음과 같습니다.
+
+```jsx
+["blue", "Blue!"];
+```
+
+`tokens` 배열은 `expressions` 배열보다 항상 1개 더 많은 요소를 갖기 때문에, 간단하게 묶을 수 있습니다.
+
+```jsx
+const allTokens = tokens.map((token, i) => (expressions[i - 1] ?? "") + token);
+```
+
+이렇게 하면 문자열 배열이 생성됩니다.
+
+```jsx
+['<div class="', 'blue">', "Blue!</div>"];
+```
+
+위의 문자열을 결합하여 HTML을 만들 수 있습니다.
+
+```jsx
+const htmlString = allTokens.join("");
+```
+
+그런 다음 `innerHTML`을 사용하여 `<template>`으로 구문 분석할 수 있습니다.
+
+```jsx
+function parseTemplate(htmlString) {
+  const template = document.createElement("template");
+  template.innerHTML = htmlString;
+  return template;
+}
+```
+
+이 `template`에는 복제할 수 있는 비활성 DOM(기술적으로는 [`DocumentFragment`](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment))이 포함되어 있습니다.
+
+```jsx
+const cloned = template.content.cloneNode(true);
+```
+
+물론 `html` 함수가 호출될 때마다 전체 HTML을 구문 분석하는 것은 성능에 좋지 않을 수 있습니다. 다행히 tagged template literal에는 이를 해결하는 데 큰 도움이 되는 기능이 내장되어 있습니다.
+
+tagged template literal을 고유하게 사용할 때, 함수가 호출될 때마다 `tokens` 배열은 [항상 동일](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates)하며, 실제로는 완전히 동일한 객체입니다.
+
+예를 들어 이 경우를 생각해 보세요.
+
+```jsx
+function sayHello(name) {
+  return html`<div>Hello ${name}</div>`;
+}
+```
+
+`sayHello`를 호출할 때마다 `tokens` 배열은 항상 동일합니다.
+
+```jsx
+["<div>Hello ", "</div>"];
+```
+
+`tokens`가 변경되는 유일한 경우는 tagged template literal의 위치가 완전히 다른 경우입니다.
+
+```jsx
+html`<div></div>`;
+html`<span></span>`; // 위의 코드와 다릅니다.
+```
+
+`WeakMap`을 사용하여 `tokens` 배열을 결과 `template`에 매핑함으로써 이를 유리하게 활용할 수 있습니다:
+
+```jsx
+const tokensToTemplate = new WeakMap();
+
+function html(tokens, ...expressions) {
+  let template = tokensToTemplate.get(tokens);
+  if (!template) {
+    // ...
+    template = parseTemplate(htmlString);
+    tokensToTemplate.set(tokens, template);
+  }
+  return template;
+}
+```
+
+`tokens` 배열의 고유성은 본질적으로 `` html`...` ``에 대한 각 호출이 HTML을 한 번만 파싱하도록 보장할 수 있다는 것을 의미합니다.
+
+다음으로, (`tokens`와 달리 매번 다를 수 있는) `expressions` 배열로 복제된 DOM 노드를 업데이트하는 방법만 있으면 됩니다.
+
+간단하게, `expressions` 배열을 각 인덱스에 대한 자리 표시자로 대체하겠습니다.
+
+```jsx
+const stubs = expressions.map((_, i) => `__stub-${i}__`);
+```
+
+이전과 같이 묶어보면 다음과 같은 HTML이 생성됩니다.
+
+```jsx
+<div class="__stub-0__">__stub-1__</div>
+```
+
+간단한 문자열 교체 함수를 작성하여 `stub`을 교체할 수 있습니다.
+
+```jsx
+function replaceStubs(string) {
+  return string.replaceAll(/__stub-(\d+)__/g, (_, i) => expressions[i]);
+}
+```
+
+이제 `html` 함수가 호출될 때마다 템플릿을 복제하고 플레이스홀더(역: `stub`)를 업데이트할 수 있습니다.
+
+```jsx
+const element = cloned.firstElementChild;
+for (const { name, value } of element.attributes) {
+  element.setAttribute(name, replaceStubs(value));
+}
+element.textContent = replaceStubs(element.textContent);
+```
+
+> **참고**: 템플릿에서 첫 번째 최상위 요소를 가져오는 데 `firstElementChild`를 사용하고 있습니다. 예제 프레임워크에서는 요소가 하나만 있다고 가정합니다.
+
+업데이트할 필요가 없는 `textContent`와 `attribute`를 업데이트하고 있기 때문에, 여전히 효율적이지 않습니다. 하지만 예제 프레임워크에서는 이 정도면 충분합니다.
+
+다른 `state`로 렌더링하여 테스트해 볼 수 있습니다.
+
+```jsx
+document.body.appendChild(render({ color: "blue", text: "Blue!" }));
+document.body.appendChild(render({ color: "red", text: "Red!" }));
+```
+
+작동합니다!
+
+([Codepen](https://codepen.io/nolanlawson-the-selector/pen/WNPyqEb))
+
+### 3. 반응성과 DOM 렌더링의 결합
+
+위의 렌더링 시스템에서 이미 `createEffect`를 구현하였으므로, 이제 이 두 가지를 결합하여 상태에 따라 DOM을 업데이트할 수 있습니다.
+
+```jsx
+const container = document.getElementById("container");
+
+createEffect(() => {
+  const dom = render(state);
+  if (container.firstElementChild) {
+    container.firstElementChild.replaceWith(dom);
+  } else {
+    container.appendChild(dom);
+  }
+});
+```
+
+실제로 작동합니다! 다른 effect를 만들어 `text`를 설정하기만 하면, 반응성 단락의 'sum' 예제와 결합해볼 수 있습니다.
+
+```jsx
+createEffect(() => {
+  state.text = `Sum is: ${state.sum}`;
+});
+```
+
+이렇게 하면 "Sum is: 3"이 렌더링됩니다.
+
+([Codepen](https://codepen.io/nolanlawson-the-selector/pen/XWOYLEa))
+
+`state.a = 5`로 설정하면 텍스트가 "Sum is: 7"으로 자동 업데이트됩니다.
+
+### 다음 단계
+
+이 시스템에는 개선할 수 있는 부분이 많으며, 특히 DOM 렌더링에 대한 개선이 다소 필요합니다.
+
+가장 눈에 띄는 것은, 깊은 DOM 트리 안에 있는 요소의 컨텐츠를 업데이트할 수 있는 방법이 없다는 점입니다.
+
+```jsx
+<div class="${color}">
+  <span>${text}</span>
+</div>
+```
+
+이를 위해서, 템플릿 내부의 모든 요소를 고유하게 식별할 방법이 필요합니다. 이를 수행하는 방법에는 여러 가지가 있습니다.
+
+1. Lit은 HTML을 구문 분석할 때 [정규식과 문자 매칭](https://github.com/lit/lit/blob/1af7991c27456c7e6073a3ee6f18f102c2adc026/packages/lit-html/src/lit-html.ts#L779-L857)을 사용하여, 플레이스홀더가 속성 또는 텍스트 콘텐츠 내에 있는지 여부와 대상 요소의 인덱스를 확인합니다(깊이 우선 [`TreeWalker`](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker) 활용).
+2. Svelte, Solid는 컴파일 중에 동일한 정보를 제공하는 전체 HTML 템플릿을 파싱합니다. 또한 `firstChild`와 `nextSibling`를 호출하여 DOM을 탐색해 업데이트할 요소를 찾는 코드를 생성합니다.
+
+> 참고: `firstChild`와 `nextSibling`를 사용한 탐색 방식은 `TreeWalker` 방식과 유사하지만 `element.children`보다 더 효율적입니다. 브라우저는 내부적으로 [linked list](https://viethung.space/blog/2020/09/01/Browser-from-Scratch-DOM-API/#Choosing-DOM-tree-data-structure)를 사용해 DOM을 표현하기 때문입니다.
+
+Lit 스타일의 클라이언트 측 구문 분석을 하든, Svelte/Solid 스타일의 컴파일 타임 구문 분석을 하든, 우리가 원하는 것은 아래와 같은 매핑입니다.
+
+```jsx
+[
+  {
+    elementIndex: 0, // <div> above
+    attributeName: 'class',
+    stubIndex: 0 // index in expressions array
+  },
+  {
+    elementIndex: 1 // <span> above
+    textContent: true,
+    stubIndex: 1 // index in expressions array
+  }
+]
+```
+
+이러한 바인딩은 어떤 요소를 업데이트해야 하는지, 어떤 `attribute`(또는 `textContent`)를 설정해야 하는지, `stub`을 대체할 `expression`을 어디에서 찾을 수 있는지를 정확하게 알려줍니다.
+
+다음 단계는 매번 템플릿을 복제하지 않고 `expression`을 기반으로 DOM을 직접 업데이트하는 것입니다. 즉, 구문 분석만 한 번 실행되는 것이 아닌 바인딩도 한 번만 복제하고 설정하는 것입니다. 이렇게 하면 이후의 업데이트에서 최소한으로 `setAttribute`와 `textContent`를 호출할 수 있습니다.
+
+> **참고**: 어차피 `setAttribute`와 `textContent`를 호출해야 한다면, 템플릿 복제의 요점이 무엇인지 궁금할 수 있습니다. 이는 대부분의 HTML 템플릿이 몇 가지 동적 "구멍"이 있는 정적인 콘텐츠이기 때문입니다. 템플릿 복제를 사용하면 "구멍"에 대한 추가 작업만 수행하면서 대부분의 DOM을 복제할 수 있습니다. 이것이 바로 이 시스템이 잘 작동하는 핵심 인사이트입니다.
+
+구현할 수 있는 다른 흥미로운 패턴은 이터레이션으로, 업데이트 간의 목록 조정과 효율적인 교체를 위한 'key' 처리와 같은 과제가 생깁니다.
+
+하지만 저는 피곤하고, 이 글은 충분히 길어졌습니다. 따라서 나머지는 독자의 몫으로 남겨두겠습니다!
+
+## 결론
+
+여기까지입니다. 하나의 긴 블로그 포스팅을 통해 자체 JavaScript 프레임워크를 구현했습니다. 이 글을 새로운 JavaScript 프레임워크의 기초로 삼아 전 세계에 공개하고 Hacker News 구독자들을 열광시키세요.
+
+개인적으로 저는 이 프로젝트가 매우 교육적이라고 느꼈기 때문에 시작하게 되었습니다. 또한 [이모지 피커 컴포넌트](https://github.com/nolanlawson/emoji-picker-element/)의 프레임워크를 더 작고 맞춤화된 솔루션으로 대체하고자 했습니다. 그 과정에서 모든 테스트를 통과하고 기존 구현보다 약 6KB 더 [작은 프레임워크](https://github.com/nolanlawson/emoji-picker-element/pull/381)를 작성할 수 있었는데, 꽤 자랑스럽습니다.
+
+나중엔 브라우저 API가 사용자 정의 프레임워크를 더욱 쉽게 구축할 수 있을 정도의 기능을 갖추면 좋을 것 같습니다. 예를 들어, [DOM Part API 제안](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/DOM-Parts.md)은 위에서 구축한 DOM 파싱 및 교체 시스템의 번거로움을 상당 부분 해소하는 동시에, 잠재적인 브라우저 성능 최적화의 기회를 만들어줄 것 입니다. 또한 `Proxy`를 확장하면 flushing, batching, 또는 cycle 감지와 같은 디테일에 대해 걱정할 필요 없이, 완전한 반응성 시스템을 더 쉽게 구축할 수 있을 것이라고 상상할 수도 있습니다(다소 엉뚱하지만요).
+
+이 모든 것이 갖춰져 있다면 "Lit in the browser"을 효과적으로 구현하거나 적어도 자신만의 "Lit in the browser"을 빠르게 구축하는 방법을 상상해볼 수 있을 것입니다. 이 작은 연습을 통해, 프레임워크 작성자가 생각하는 몇 가지 사항과 여러분이 즐겨 사용하는 JavaScript 프레임워크의 내부 메커니즘을 설명하는 데 도움이 되었기를 바랍니다.
+
+이 글의 초안에 대한 피드백을 제공해 주신 [Pierre-Marie Dartus](https://pm.dartus.fr/) 님에게 감사드립니다.
