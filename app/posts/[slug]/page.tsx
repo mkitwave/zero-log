@@ -28,7 +28,12 @@ export async function generateMetadata({
     },
     description: post.excerpt,
     openGraph: defaultMetadata,
-    twitter: defaultMetadata,
+    twitter: {
+      ...defaultMetadata,
+      card: "summary",
+      site: "@1EEZER0",
+      creator: "@1EEZER0",
+    },
   };
 }
 
