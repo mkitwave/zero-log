@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     ...defaultMetadata,
-    card: "summary_large_image",
+    card: "summary",
     site: "@1EEZER0",
     creator: "@1EEZER0",
     images: ["/assets/og-image.png"],
