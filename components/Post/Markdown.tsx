@@ -19,9 +19,9 @@ export const Markdown = ({ source }: Props) => {
             <h2 className="text-3xl font-semibold pt-8">{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-2xl font-semibold pt-3">{children}</h3>
+            <h3 className="text-xl font-semibold pt-3">{children}</h3>
           ),
-          h4: ({ children }) => <h4 className="text-xl pt-1">{children}</h4>,
+          h4: ({ children }) => <h4 className="text-lg pt-1">{children}</h4>,
 
           // Lists
           ul: ({ children }) => (
