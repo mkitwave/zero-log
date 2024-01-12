@@ -1,6 +1,5 @@
 "use client";
 
-import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -18,8 +17,8 @@ const Eye = ({ position }: { position: [number, number, number] }) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-      iris.position.x = Math.atan2(x, 1);
-      iris.position.y = Math.atan2(y, 1);
+      iris.position.x = Math.atan2(x, 0.5);
+      iris.position.y = Math.atan2(y, 0.5);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
