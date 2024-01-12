@@ -1,39 +1,51 @@
 "use client";
 
 import { OrbitControls } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useRef } from "react";
+import { Canvas } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 const Eye = ({ position }: { position: [number, number, number] }) => {
-  const { viewport } = useThree();
-  const eyeRef = useRef<THREE.Group>(null);
+  const isLeft = position[0] < 0;
+  const irisGroupRef = useRef<THREE.Group>(null);
+  const irisMeshRef = useRef<THREE.Mesh>(null);
 
-  useFrame(({ mouse }) => {
-    if (!eyeRef.current) return;
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!irisGroupRef.current) return;
+      const iris = irisGroupRef.current;
 
-    const eye = eyeRef.current;
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    const x = (mouse.x * viewport.width) / 2;
-    const y = (mouse.y * viewport.height) / 2;
+      iris.position.x = Math.atan2(x, 1);
+      iris.position.y = Math.atan2(y, 1);
+    };
 
-    const angleX = Math.atan2(x, 10);
-    const angleY = Math.atan2(y, 10);
+    window.addEventListener("mousemove", handleMouseMove);
 
-    eye.position.y = angleY;
-    eye.position.x = angleX;
-  });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
 
   return (
     <>
-      <mesh position={position} castShadow receiveShadow>
-        <capsuleGeometry args={[3, 2, 30, 64]} />
-        <meshLambertMaterial color="white" />
+      <mesh position={position} castShadow receiveShadow scale={[1.1, 1.8, 1]}>
+        <sphereGeometry args={[3.5]} />
+        <meshStandardMaterial roughness={0.1} metalness={0.1} color="white" />
       </mesh>
-      <group ref={eyeRef}>
-        <mesh position={[position[0], 0, 3.3]}>
-          <sphereGeometry args={[1.4, 64, 32]} />
-          <meshLambertMaterial color="black" />
+      <group ref={irisGroupRef}>
+        <mesh
+          ref={irisMeshRef}
+          position={[isLeft ? position[0] + 0.5 : position[0] - 0.5, 0, 3.3]}
+        >
+          <sphereGeometry args={[2, 64, 32]} />
+          <meshStandardMaterial
+            roughness={0.1}
+            metalness={0.1}
+            color="#3d3624"
+          />
         </mesh>
       </group>
     </>
@@ -42,12 +54,11 @@ const Eye = ({ position }: { position: [number, number, number] }) => {
 
 export const Eyes = () => {
   return (
-    <Canvas shadows camera={{ position: [0, 0, 10], fov: 75 }}>
-      <OrbitControls />
+    <Canvas shadows camera={{ position: [0, 0, 24], fov: 40 }}>
       <ambientLight intensity={1} />
       <directionalLight position={[10, 10, 10]} />
-      <Eye position={[-4, 0, 1]} />
-      <Eye position={[4, 0, 1]} />
+      <Eye position={[-4.5, 0, 1]} />
+      <Eye position={[4.5, 0, 1]} />
     </Canvas>
   );
 };
