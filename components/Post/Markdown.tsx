@@ -44,7 +44,7 @@ export const Markdown = ({ source }: Props) => {
 
           // Image
           img: ({ src, alt }) => (
-            <div className="w-full flex justify-center py-6">
+            <span className="w-full flex justify-center py-6">
               <Image
                 src={src ?? ""}
                 alt={alt ?? ""}
@@ -52,7 +52,7 @@ export const Markdown = ({ source }: Props) => {
                 height={400}
                 className="w-full md:w-[70%] rounded-lg shadow-md"
               />
-            </div>
+            </span>
           ),
 
           blockquote: ({ children }) => (
