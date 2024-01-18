@@ -12,7 +12,7 @@ type Props = {
     items: { name: string; type: "dark" | "light" }[];
   }[];
   icon?: ReactNode;
-  items: Array<{ title: string; descriptions: Array<string | Array<string>> }>;
+  items: Array<{ title: ReactNode }>;
 };
 
 export const Project = ({
@@ -58,27 +58,9 @@ export const Project = ({
           </StackBox>
         ))}
       </div>
-      <ul className="flex flex-col gap-y-6">
-        {items.map(({ title, descriptions }, index) => (
-          <li key={index} className="flex flex-col gap-y-2">
-            <h5 className="font-semibold text-lg">{title}</h5>
-            <ul className="list-inside list-disc leading-relaxed gap-y-2 flex flex-col">
-              {descriptions.map((description, index) =>
-                typeof description === "string" ? (
-                  <li key={index}>{description}</li>
-                ) : (
-                  <ul
-                    key={index}
-                    className="pl-6 list-inside list-square flex flex-col gap-y-1"
-                  >
-                    {description.map((detailedDescription) => (
-                      <li key={detailedDescription}>{detailedDescription}</li>
-                    ))}
-                  </ul>
-                ),
-              )}
-            </ul>
-          </li>
+      <ul className="flex flex-col gap-y-1 list-inside list-disc">
+        {items.map(({ title }, index) => (
+          <li key={index}>{title}</li>
         ))}
       </ul>
     </div>

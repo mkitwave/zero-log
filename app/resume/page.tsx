@@ -17,7 +17,6 @@ export default function Resume() {
       <div className="flex flex-col gap-y-16 md:w-[56rem] w-full h-full text-start items-center">
         <Introduction />
         <Work />
-        <Skills />
         <Projects />
         <Education />
       </div>
