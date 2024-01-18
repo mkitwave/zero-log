@@ -1,3 +1,4 @@
+import { SB } from "../Common";
 import { Box } from "./Common";
 
 export const Introduction = () => {
@@ -6,18 +7,20 @@ export const Introduction = () => {
       <p className="text-4xl leading-relaxed">
         안녕하세요,
         <br />
-        <b>2년차 프론트엔드 개발자 이예서</b>입니다.
+        <b>웹 프론트엔드 개발자 이예서</b>입니다.
       </p>
-      <ul className="flex gap-y-1 flex-col text-lg">
+      <ul className="flex gap-y-1 flex-col text-lg list-disc list-inside">
         <li>
-          타인에게 망설임 없이 추천할 수 있는, 일상 속에 자연스럽게 스며드는
-          제품을 개발하는 것을 목표로 하고 있습니다.
+          <SB>주도적이고 책임감 있게 일할 수 있는 환경</SB>을 좋아합니다.
         </li>
         <li>
-          좋은 제품을 만들기 위해 유저의 상황에 몰입하여 최선의 방향을 고민하고,
-          적극적으로 커뮤니케이션합니다.
+          신뢰받는 동료가 되기 위해 <SB>생산성 및 기술적 역량</SB>을
+          성장시킵니다.
         </li>
-        <li>유연하게 변화에 적응하며, 새로운 도전을 즐깁니다.</li>
+        <li>
+          본인 또는 팀의 <SB>문제에 대해 객관적으로 관찰, 판단</SB>하기 위해
+          노력하며, 더 나은 방향을 고민합니다.
+        </li>
       </ul>
       <div className="flex">
         {[
@@ -34,7 +37,7 @@ export const Introduction = () => {
               key={name}
               target="_blank"
               href={url}
-              className="px-2 first:pl-0 text-sm underline"
+              className="px-2 first:pl-0 text-md underline"
             >
               {name}
             </a>

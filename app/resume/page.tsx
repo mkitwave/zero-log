@@ -1,9 +1,10 @@
+import { TfiDownload } from "react-icons/tfi";
 import {
   Education,
   Introduction,
   Projects,
-  Skills,
   Work,
+  PdfButton,
 } from "../../components/Resume";
 
 export const metadata = {
@@ -17,10 +18,10 @@ export default function Resume() {
       <div className="flex flex-col gap-y-16 md:w-[56rem] w-full h-full text-start items-center">
         <Introduction />
         <Work />
-        <Skills />
         <Projects />
         <Education />
       </div>
+      <PdfButton />
     </article>
   );
 }

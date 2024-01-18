@@ -4,10 +4,11 @@ import { Company } from "./Company";
 export const Work = () => {
   return (
     <Box className="flex flex-col gap-y-14">
-      <h3 className="font-bold text-4xl">Work Experience</h3>
+      <h3 className="font-semibold text-4xl">✦ Work Experience</h3>
       <Company
         name="마플코퍼레이션"
-        description="2021.10 - 2023.11"
+        description={`2021.10 - 2023.11
+         (2년 2개월)`}
         url="https://www.marpplecorp.com/"
       >
         <p className="leading-loose">
