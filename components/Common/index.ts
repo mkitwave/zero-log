@@ -1,3 +1,3 @@
-export { default as CoverImage } from "./cover-image";
-export { default as DateFormatter } from "./date-formatter";
+export { CoverImage } from "./CoverImage";
+export { DateFormatter } from "./DateFormatter";
 export { SB } from "./Semibold";

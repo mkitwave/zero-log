@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { flat, map, toArray, uniq } from "@fxts/core";
 import PostType from "../../interfaces/post";
-import { PreviewPost } from "./preview-post";
+import { PreviewPost } from "./PreviewPost";
 
 type Props = { posts: PostType[] };
 

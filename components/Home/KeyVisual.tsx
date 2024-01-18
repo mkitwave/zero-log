@@ -1,6 +1,6 @@
 import { Eyes } from "./Eyes";
 
-const KeyVisual = () => {
+export const KeyVisual = () => {
   return (
     <section className="flex items-center h-0 grow w-full">
       <div className="flex lg:flex-row flex-col items-center gap-x-20 w-full h-full py-5">
@@ -16,5 +16,3 @@ const KeyVisual = () => {
     </section>
   );
 };
-
-export default KeyVisual;
