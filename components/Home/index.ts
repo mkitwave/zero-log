@@ -1,1 +1,1 @@
-export { default as KeyVisual } from "./key-visual";
+export { KeyVisual } from "./KeyVisual";
