@@ -1,0 +1,257 @@
+---
+title: "네이티브 도움 없이 웹뷰 간 데이터 동기화하기"
+excerpt: "(feat. BroadcastChannel API)"
+date: "2024-02-04"
+tags:
+  - R3F
+coverImage: "/assets/blog/webview-synchronization/cover.jpg"
+ogImage:
+  url: "/assets/blog/webview-synchronization/cover.jpg"
+---
+
+## 들어가는 글
+
+웹뷰 기반의 앱을 개발하다 보면, A 웹뷰 액티비티에서 B 액티비티, 또는 B, C, D 액티비티 전부로 데이터를 보내야 하는 경우가 자주 있다.
+
+예를 들어보자.
+
+1. 프로필 상세 액티비티에서 프로필 수정 액티비티를 연다.
+2. 프로필 수정 액티비티에서 프로필 정보를 수정한다.
+3. 프로필 수정 액티비티를 닫았을 때, **수정된 정보가 프로필 상세 액티비티에 반영되어 있다.**
+
+![example](/assets/blog/webview-synchronization/example.png)
+
+2개의 서로 다른 웹뷰 액티비티는, 2개의 서로 다른 크롬 창이 열려있는 것과 같이 완전히 다른 앱으로 존재한다. 하나의 앱이 아닌데, 어떻게 데이터를 주고받을 수 있을까?
+
+이 글에서는 React Native + React Webview 환경에서 이러한 상황을 해결했던 방법과 수반되었던 문제점, 이 문제점을 **BroadcastChannel API**를 사용해 개선했던 경험을 설명한다.
+
+## 방법 1: 네이티브 앱 거쳐서 전달하기
+
+![way1](/assets/blog/webview-synchronization/way1.png)
+
+발신하고자 하는 웹뷰(Profile Setting)에서 네이티브 앱으로 데이터를 전달한다.
+
+```tsx
+// React Web Code
+
+const ProfileSettingPage = () => {
+	const onSubmit = (profile: Profile) => {
+		window.ReactNativeWebview.postMessage({
+			type: "edited-profile",
+			payload: profile
+		});
+	}
+
+	...
+}
+```
+
+네이티브 앱에서 해당 데이터를 받아 적절한 웹뷰(Profile Detail)에 전달한다.
+
+```tsx
+// React Native App Code (with Recoil)
+
+const profileState = atom({
+  key: 'Profile',
+  default: null,
+});
+
+const ProfileSettingScreen = () => {
+const setProfile = useSetRecoilState(profileState);
+
+  return (
+    <View>
+      <WebView
+        onMessage={(event) => {
+        const message = event.nativeEvent.data;
+        if (message.type === "edited-profile") {
+          setProfile(message.payload)
+        }
+        }}
+      ...
+      />
+    </View>
+  );
+};
+
+const ProfileDetailScreen = () => {
+const profile = useRecoilValue(profileState);
+  const webViewRef = useRef(null);
+
+useEffect(() => {
+    webViewRef.current.postMessage({
+    type: "edited-profile",
+    payload: profile
+  });
+}, [profile])
+
+  return (
+    <View>
+      <WebView
+        ref={webViewRef}
+      ...
+      />
+    </View>
+  );
+};
+```
+
+수신한 웹뷰(Profile Detail)에서 받은 데이터를 활용한다.
+
+```tsx
+// React Web Code
+
+const ProfileDetailPage = () => {
+useEffect(() => {
+    const handleMessageFromApp = (event) => {
+      const message = event.data;
+    if (message.type === "edited-profile") {
+      // something...
+    }
+    };
+    window.addEventListener("message", handleMessageFromApp);
+
+    return () => {
+      window.removeEventListener("message", handleMessageFromApp);
+    };
+  }, []);
+
+...
+}
+```
+
+적용 당시 앱 ↔ 웹 통신 코드가 이미 구축되어 있었기에 해당 방법을 채택했지만, 아래와 같은 문제점들이 있었다.
+
+### 문제점
+
+- 공유하고자 하는 데이터를 추가·수정·삭제할 때 앱 배포가 필요하다. 배포 시마다 앱 심사를 통과해야 하기에 병목이 생긴다.
+- 서비스가 고도화될수록 앱에서 컨트롤해야 하는 데이터 타입이 비대해지고, 관리 포인트가 늘어난다.
+
+## 방법 2: BroadcastChannel API 이용하기
+
+### BroadcastChannel API?
+
+[BroadcastChannel API](https://developer.mozilla.org/ko/docs/Web/API/Broadcast_Channel_API)란 동일한 origin의 브라우징 맥락(창, 탭, 프레임, iframe, …) 간 데이터 통신을 가능하게 하는 기술이다. 기본적으로 `BroadcastChannel` 객체를 생성하고, 생성된 객체에서 `postMessage` 메서드를 호출하면 해당 채널에 연결된 `BroadcastChannel` 객체에 전달되게끔 한다.
+
+간략하게 사용법을 살펴보자.
+
+```tsx
+// 채널에 연결
+const bc = new BroadcastChannel("test_channel");
+
+// 메시지 발신
+bc.postMessage("This is a test message.");
+
+// 메시지 수신
+bc.onmessage = (event) => {
+  console.log(event);
+};
+```
+
+### useBroadcastChannel
+
+API를 React 환경에서 보다 쉽게 사용하기 위해, `useBroadcastChannel` hook을 작성해보았다. (브라우저 내장 API의 경우 지원 브라우저 범위가 한정적이기 때문에 [pubkey/broadcast-channel](https://github.com/pubkey/broadcast-channel#handling-indexeddb-onclose-events) 라이브러리를 활용했다.)
+
+```tsx
+import { BroadcastChannel, BroadcastChannelOptions } from "broadcast-channel";
+import { useRef, useEffect, useCallback } from "react";
+
+type MessageByChannelName = {
+  profile: ProfileMessage;
+};
+
+type BroadcastChannelName = keyof MessageByChannelName;
+
+export function useBroadcastChannel<ChannelName extends BroadcastChannelName>(
+  channelName: ChannelName,
+  onMessage?: (message: MessageByChannelName[ChannelName]) => void,
+) {
+  type Message = MessageByChannelName[ChannelName];
+
+  const broadcastChannelRef = useRef<BroadcastChannel<Message> | null>(null);
+  const mountedRef = useRef<boolean>(false);
+  const onMessageRef = useRef<((message: Message) => void) | null>(null);
+
+  const postMessage = useCallback(async (message: Message) => {
+    if (
+      broadcastChannelRef.current &&
+      broadcastChannelRef.current.isClosed !== true
+    ) {
+      await broadcastChannelRef.current.postMessage(message);
+    }
+  }, []);
+
+  const close = () => {
+    if (
+      broadcastChannelRef.current &&
+      broadcastChannelRef.current.isClosed !== true
+    ) {
+      broadcastChannelRef.current.close();
+    }
+    broadcastChannelRef.current = null;
+  };
+
+  const createChannel = useCallback((channelName: string) => {
+    const channel: BroadcastChannel<Message> = new BroadcastChannel<Message>(
+      channelName,
+    );
+
+    const handleMessage = (message: Message) => {
+      if (!mountedRef.current) {
+        return;
+      }
+      onMessageRef.current?.(message);
+    };
+
+    channel.onmessage = handleMessage;
+    broadcastChannelRef.current = channel;
+  }, []);
+
+  useEffect(() => {
+    onMessageRef.current = onMessage ?? null;
+  }, [onMessage]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    createChannel(channelName, options);
+
+    return () => {
+      mountedRef.current = false;
+      close();
+    };
+  }, [channelName, createChannel]);
+
+  return { postMessage };
+}
+```
+
+### 사용 예시
+
+```tsx
+const ProfileSettingPage = () => {
+  const { postMessage } = useBroadcastChannel("edited-profile");
+
+  const onSubmit = (profile: Profile) => {
+    postMessage(profile);
+  };
+};
+
+const ProfileDetailPage = () => {
+  useBroadcastChannel("edited-profile", (profile) => {
+    // ...something
+  });
+};
+```
+
+앱을 거칠 필요가 없어진 것은 물론이고, 코드도 훨씬 간결해진 것을 볼 수 있다. 번외로, Tanstack Query의 경우 [broadcastQueryClient](https://tanstack.com/query/latest/docs/framework/react/plugins/broadcastQueryClient) 플러그인을 제공해 보다 쉽게 데이터를 공유할 수 있다. 아직 Experimental 기능이기 때문에 프로덕션 코드에 반영하는 것은 주의가 필요하다.
+
+## 오프 더 레코드
+
+- 이번 글을 준비하며, 번역되지 않은 Broadcast Channel API의 mdn 문서가 마음에 걸려 [직접 번역 기여를 하게 되었다.](https://zerolog.vercel.app/posts/mdn-contribute) 학습 시 도움이 되기를 바라는 마음이다.
+- 이미지 에셋들은 [Uizard](https://uizard.io/)의 wireframe 기능을 활용해 만들었다.
+
+## 참고 자료
+
+- [The `window.ReactNativeWebView.postMessage` method and `onMessage` prop | react-native-webview Docs](https://github.com/react-native-webview/react-native-webview/blob/master/docs/Guide.md#the-windowreactnativewebviewpostmessage-method-and-onmessage-prop)
+- [웹뷰 액티비티간 데이터 동기화하기 | 카카오스타일 기술블로그](https://devblog.kakaostyle.com/ko/2022-10-12-1-sync-data-between-activities/)
+- [Broadcast Channel API | mdn](https://developer.mozilla.org/ko/docs/Web/API/Broadcast_Channel_API)
