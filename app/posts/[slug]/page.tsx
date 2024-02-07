@@ -5,6 +5,7 @@ import "../../../styles/markdown.css";
 import { Comment } from "../../../components/Post/Comment";
 import { Metadata } from "next";
 import { BLOG_TITLE } from "../../../lib/constants";
+import { Toc } from "../../../components/Post/Toc";
 
 type Props = {
   params: { slug: string };
@@ -46,7 +47,7 @@ export default async function PostPage({ params: { slug } }: Props) {
   const post = source.post;
 
   return (
-    <article className="md:p-10 p-3">
+    <article className="p-3">
       <div className="flex flex-col items-center">
         <div className="w-[65rem] max-w-full flex flex-col pt-[3rem] gap-y-4 mb-16">
           <h1 className="text-6xl font-medium break-keep tracking-tighter leading-tight md:leading-none md:text-start text-center">
@@ -59,11 +60,10 @@ export default async function PostPage({ params: { slug } }: Props) {
         <div className="w-[75rem] max-w-full overflow-hidden border border-gray-500 rounded-xl mb-16">
           <CoverImage title={post.title} src={post.coverImage} />
         </div>
-        <div className="w-[65rem] max-w-full">
-          <div className="w-[65rem] max-w-full">
-            <Markdown source={source} />
-            <Comment />
-          </div>
+        <Toc />
+        <div className="w-[65rem] max-w-full md:max-w-[60%]">
+          <Markdown source={source} />
+          <Comment />
         </div>
       </div>
     </article>

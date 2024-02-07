@@ -10,18 +10,35 @@ type Props = {
 
 export const Markdown = ({ source }: Props) => {
   return (
-    <article className="leading-loose flex flex-col gap-y-3 w-full pb-20">
+    <article
+      id="markdown"
+      className="leading-loose flex flex-col gap-y-3 w-full pb-20"
+    >
       <MDXRemote
         {...source}
         components={{
           // Headings
           h2: ({ children }) => (
-            <h2 className="text-3xl font-semibold pt-8">{children}</h2>
+            <h2
+              id={children?.toString()}
+              className="text-3xl font-semibold pt-8"
+            >
+              {children}
+            </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-xl font-semibold pt-3">{children}</h3>
+            <h3
+              id={children?.toString()}
+              className="text-xl font-semibold pt-3"
+            >
+              {children}
+            </h3>
           ),
-          h4: ({ children }) => <h4 className="text-lg pt-1">{children}</h4>,
+          h4: ({ children }) => (
+            <h4 id={children?.toString()} className="text-lg pt-1">
+              {children}
+            </h4>
+          ),
 
           // Lists
           ul: ({ children }) => (
