@@ -30,10 +30,6 @@ export async function GET(request: Request) {
             </div>
             <div tw="flex items-center">
               <span tw="text-2xl">Zero.log</span>
-              <img
-                src="https://zerolog.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fkey-visual-eyes.20f52cc5.gif&w=128&q=75"
-                tw="w-10 h-10 ml-2"
-              />
             </div>
           </div>
         </div>
