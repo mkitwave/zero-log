@@ -4,6 +4,9 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get("title");
   const excerpt = searchParams.get("excerpt");
+  const fontData = await fetch(
+    new URL("public/assets/font/GmarketSansTTFMedium.ttf", import.meta.url),
+  ).then((res) => res.arrayBuffer());
   return new ImageResponse(
     (
       <div
@@ -50,6 +53,13 @@ export async function GET(request) {
     {
       width: 1200,
       height: 630,
+      fonts: [
+        {
+          name: "GmarketSansMedium",
+          data: fontData,
+          style: "normal",
+        },
+      ],
     },
   );
 }
