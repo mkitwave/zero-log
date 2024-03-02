@@ -13,7 +13,6 @@ export async function GET(request) {
         tw="h-full w-full flex p-10 flex-col items-end text-black"
         style={{
           backgroundColor: "#F9FAFB",
-          fontFamily: "GmarketSansMedium",
           wordBreak: "break-all",
         }}
       >
@@ -27,13 +26,6 @@ export async function GET(request) {
     {
       width: 1200,
       height: 630,
-      fonts: [
-        {
-          name: "GmarketSansMedium",
-          data: fontData,
-          style: "normal",
-        },
-      ],
     },
   );
 }
