@@ -20,6 +20,7 @@ export async function GET(request) {
           color: "black",
           backgroundColor: "#F9FAFB",
           wordBreak: "break-all",
+          fontFamily: "GmarketSansMedium",
         }}
       >
         <div
