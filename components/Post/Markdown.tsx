@@ -29,7 +29,7 @@ export const Markdown = ({ source }: Props) => {
           h3: ({ children }) => (
             <h3
               id={children?.toString()}
-              className="text-xl font-semibold pt-3"
+              className="text-xl font-semibold pt-4"
             >
               {children}
             </h3>
@@ -42,7 +42,9 @@ export const Markdown = ({ source }: Props) => {
 
           // Lists
           ul: ({ children }) => (
-            <ul className="list-disc list-inside">{children}</ul>
+            <ul className="list-disc list-inside flex flex-col gap-y-3">
+              {children}
+            </ul>
           ),
           ol: ({ children }) => (
             <ol className="list-decimal list-inside">{children}</ol>

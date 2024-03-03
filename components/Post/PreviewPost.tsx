@@ -18,11 +18,11 @@ export const PreviewPost = ({ post }: Props) => {
       <hr className="w-10 border-gray-500" />
       <div className="flex flex-col gap-y-2 items-center h-0 grow">
         <span className="text-3xl w-[80%]">{title}</span>
-        <p>
+        <p className="flex flex-wrap gap-x-1">
           {tags.map((tag) => (
             <span
               key={tag}
-              className="border border-gray-500 rounded-full h-10 shrink-0 px-2 text-sm"
+              className="border border-gray-500 rounded-full h-fit flex items-center shrink-0 px-2 text-sm"
             >
               #{tag.toUpperCase()}
             </span>
