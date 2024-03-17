@@ -21,7 +21,7 @@ export const Markdown = ({ source }: Props) => {
           h2: ({ children }) => (
             <h2
               id={children?.toString()}
-              className="text-3xl font-semibold pt-8"
+              className="text-3xl font-semibold pt-10"
             >
               {children}
             </h2>
@@ -29,13 +29,13 @@ export const Markdown = ({ source }: Props) => {
           h3: ({ children }) => (
             <h3
               id={children?.toString()}
-              className="text-xl font-semibold pt-4"
+              className="text-xl font-semibold pt-6"
             >
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 id={children?.toString()} className="text-lg pt-1">
+            <h4 id={children?.toString()} className="text-lg pt-2">
               {children}
             </h4>
           ),
