@@ -13,11 +13,11 @@ export const PreviewPost = ({ post }: Props) => {
   return (
     <Link
       href={`/posts/${slug}`}
-      className="lg:h-[40rem] h-[36rem] break-keep border items-center justify-between py-10 px-10 text-center border-gray-500 text-xl flex flex-col gap-y-5"
+      className="lg:h-[40rem] h-[36rem] break-keep border items-center justify-between py-10 px-5 text-center border-gray-500 text-xl flex flex-col gap-y-5"
     >
       <hr className="w-10 border-gray-500" />
       <div className="flex flex-col gap-y-2 items-center h-0 grow">
-        <span className="text-3xl w-[80%]">{title}</span>
+        <span className="lg:text-3xl text-xl w-[80%]">{title}</span>
         <p className="flex flex-wrap gap-x-1">
           {tags.map((tag) => (
             <span
