@@ -2,7 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import keyVisual from "../../public/assets/key-visual-eyes.gif";
 import { PERSONAL_LINKS } from "../../lib/constants";
-import { TfiArrowTopRight, TfiGithub, TfiTwitterAlt } from "react-icons/tfi";
+import {
+  TfiArrowTopRight,
+  TfiGithub,
+  TfiNewWindow,
+  TfiTwitterAlt,
+} from "react-icons/tfi";
 
 export const Header = () => {
   return (
@@ -20,9 +25,14 @@ export const Header = () => {
           <Link href="/posts" className="hover:decoration-1 hover:underline">
             Posts
           </Link>
-          <Link href="/resume" className="hover:decoration-1 hover:underline">
+          <a
+            target="_blank"
+            className="flex gap-x-1.5 items-center hover:decoration-1 hover:underline"
+            href="https://www.rallit.com/hub/resumes/288151/%EC%9D%B4%EC%98%88%EC%84%9C"
+          >
             Resume
-          </Link>
+            <TfiNewWindow />
+          </a>
         </div>
         <div className="gap-x-3 md:text-md text-sm flex text-black">
           <a
