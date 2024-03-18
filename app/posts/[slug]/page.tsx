@@ -20,7 +20,9 @@ export async function generateMetadata({
   const defaultMetadata = {
     title,
     description: post.excerpt,
-    images: [post.ogImage.url],
+    images: [
+      `/api/og?title=${post.title}&excerpt=${post.excerpt}&imageUrl=${post.ogImage.url}`,
+    ],
   };
 
   return {
