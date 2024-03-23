@@ -28,7 +28,7 @@ export const Header = () => {
           <a
             target="_blank"
             className="flex gap-x-1.5 items-center hover:decoration-1 hover:underline"
-            href="https://www.rallit.com/hub/resumes/288151/%EC%9D%B4%EC%98%88%EC%84%9C"
+            href="https://zerowaste.gitbook.io/wiki"
           >
             Wiki
             <TfiNewWindow />
@@ -36,7 +36,7 @@ export const Header = () => {
           <a
             target="_blank"
             className="flex gap-x-1.5 items-center hover:decoration-1 hover:underline"
-            href="https://zerowaste.gitbook.io/wiki"
+            href="https://www.rallit.com/hub/resumes/288151/%EC%9D%B4%EC%98%88%EC%84%9C"
           >
             Resume
             <TfiNewWindow />
