@@ -1,0 +1,335 @@
+---
+title: "React로 인스타그램 필터 구현하기"
+excerpt: "Thug Life"
+date: "2024-04-26"
+tags:
+  - Tensorflow.js
+  - React
+coverImage: "/assets/blog/react-instagram-filter/cover.png"
+ogImage:
+  url: "/assets/blog/react-instagram-filter/cover.png"
+---
+
+## 들어가는 글
+
+인스타그램의 얼굴 인식 필터는 스토리나 릴스에서 거의 필수 요소가 되었다. 이 얼굴 인식 필터를 웹에서 간단히 구현해보고 싶었지만, 영문 튜토리얼 위주였고 레거시 스펙을 사용하는 경우가 다수 존재했다. 그래서, 직접 부딪쳐보며 구현했던 코드를 기반으로 튜토리얼을 작성해보고자 한다.
+
+이 튜토리얼은 웹캠 비디오를 기반으로 얼굴 인식을 해, 눈 위치에 선글라스 이미지를 씌워주는 것을 목표로 한다. 물론 다른 이미지를 사용하거나 이미지 위치를 변경할 수도 있다.
+
+([라이브 데모](https://github.com/mkitwave/thug-life-cam), [전체 코드](https://github.com/mkitwave/thug-life-cam))
+
+<video
+  style={{
+    width: "50%",
+  }}
+  src="/assets/blog/react-instagram-filter/result.mov"
+  controls
+/>
+
+바로 본론으로 넘어가보자.
+
+## 만들기
+
+### 프로젝트 세팅
+
+pnpm + Vite + React + TypeScript 조합으로 간단하게 구성해보았다.
+
+```bash
+pnpm create vite <프로젝트 이름> --template react-ts
+```
+
+필요없는 파일들, 코드들을 적절히 삭제하고, 필터로 사용하고 싶은 이미지도 미리 준비해 public 폴더에 넣어두자.
+
+### 웹캠 연동
+
+[react-webcam](https://github.com/mozmorris/react-webcam)을 사용해 웹캠을 페이지에 추가한다.
+
+```bash
+pnpm add react-webcam
+```
+
+```tsx
+// App.tsx
+
+import Webcam from "react-webcam";
+
+const videoSize = {
+  width: 640,
+  height: 480,
+};
+
+function App() {
+  return (
+    <main>
+      <Webcam width={videoSize.width} height={videoSize.height} />
+    </main>
+  );
+}
+
+export default App;
+```
+
+### 캔버스 추가
+
+Webcam 위에, 실제로 필터가 그려지는 역할을 하는 캔버스를 추가한다. CSS로 간단하게 스타일링도 해보았다.
+
+```tsx
+// App.tsx
+
+import "./app.css";
+import Webcam from "react-webcam";
+
+const videoSize = {
+  width: 640,
+  height: 480,
+};
+
+function App() {
+  return (
+    <main>
+      <div className="webcam-container">
+        <Webcam width={videoSize.width} height={videoSize.height} />
+        <canvas
+          width={videoSize.width}
+          height={videoSize.height}
+          className="filter-canvas"
+        />
+      </div>
+    </main>
+  );
+}
+
+export default App;
+```
+
+```css
+// app.css
+
+main {
+  width: 100%;
+  height: 100vh;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.webcam-container {
+  position: relative;
+  width: 640px;
+  height: 480px;
+}
+
+.filter-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+```
+
+### 얼굴 인식 모델 불러오기
+
+얼굴 인식 기능은 JavaScript 기반의 머신러닝 라이브러리 [TensorFlow.js](https://www.tensorflow.org/js/models?hl=ko)의 [Face Landmarks Detection](https://github.com/tensorflow/tfjs-models/tree/master/face-landmarks-detection)을 활용했다.
+
+Face Landmarks Detection의 심플 버전인 [Face Landmark](https://github.com/tensorflow/tfjs-models/tree/master/face-detection)라는 것도 존재하는데, 조금 덜 디테일하게 컨트롤해도 된다면 이것도 사용해봄직하다.
+
+```bash
+pnpm add @tensorflow/tfjs-core @tensorflow/tfjs-backend-webgl @tensorflow-models/face-landmarks-detection
+```
+
+함께 설치한 `@tensorflow/tfjs-core`, `@tensorflow/tfjs-backend-webgl` 은 TensorFlow.js 자체 런타임 실행을 위해 필요하다.
+
+Face Landmarks Detection의 `createDetector`를 활용해 얼굴 인식 모델을 불러오는 함수를 작성해보자.
+
+```tsx
+// load-detection-model.ts
+
+import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
+import "@tensorflow/tfjs-backend-webgl";
+import "@tensorflow/tfjs-core";
+
+export const loadDetectionModel = () => {
+  return faceLandmarksDetection.createDetector(
+    faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh,
+    {
+      runtime: "tfjs",
+      maxFaces: 1, // 인식할 최대 얼굴 수
+      refineLandmarks: false, // 이목구비 좌표 세분화 여부
+    },
+  );
+};
+```
+
+### 선글라스 위치 계산하기
+
+이제 얼굴 인식 모델의 데이터를 기반으로 선글라스의 위치를 계산하는 함수를 만들어보자.
+
+Face Landmarks Detection으로 계산된 `keypoints` 값을 이용할 것인데, 해당 keypoint가 어느 위치에 존재하는지는 [meshmap 파일](https://github.com/tensorflow/tfjs-models/blob/master/face-landmarks-detection/mesh_map.jpg)에 정의되어 있다. (아주 작게 쓰여있으니 확대해서 확인하자.)
+
+이를 기반으로 필요한 이목구비 위치의 point 값을 정의한다.
+
+```tsx
+// calculate-filter-position.ts
+
+const facePoint = {
+  leftEyeTop: 124,
+  rightEyeTop: 276,
+  leftEyeBottom: 111,
+};
+```
+
+여기서는 선글라스를 씌우는 예제이므로 눈의 좌상단, 좌하단, 우상단을 `facePoint`로 정의했다. 다른 위치에 필터를 씌우고 싶다면 이 값을 변경해주면 된다.
+
+`keypoints` 배열에서 방금 정의한 `facePoint`를 인덱스로 하는 값을 꺼내면 해당 `facePoint`의 좌표값을 알 수 있다. 예를 들어, `keypoints[facePoint.leftEyeTop].x` 는 눈 좌상단의 x좌표이다.
+
+좌표를 기반으로 선글라스 위치를 계산하는 로직은 다음과 같다.
+
+```tsx
+// calculate-filter-position.ts
+
+import { type Keypoint } from "@tensorflow-models/face-landmarks-detection";
+
+...
+
+export const calculateFilterPosition = (keypoints: Keypoint[]) => {
+  const xPadding = 30;
+  const yPadding = 10;
+
+  const x = keypoints[facePoint.leftEyeTop].x - xPadding;
+  const y = keypoints[facePoint.leftEyeTop].y - yPadding;
+  const width =
+    keypoints[facePoint.rightEyeTop].x -
+    keypoints[facePoint.leftEyeTop].x +
+    xPadding * 2;
+  const height =
+    keypoints[facePoint.leftEyeBottom].y -
+    keypoints[facePoint.leftEyeTop].y +
+    yPadding * 2;
+
+  return {
+    x,
+    y,
+    width,
+    height,
+  };
+};
+```
+
+### 조합하기
+
+웹캠 연동, 필터 역할의 캔버스 추가, 얼굴 인식 모델 로드, 선글라스 위치 계산하는 코드까지 작성해보았다. 이제 코드를 조합해 동작시키는 일만 남았다.
+
+웹캠과 캔버스 엘리먼트 각각에 ref를 연결해준다.
+
+```tsx
+// App.tsx
+
+...
+
+function App() {
+  const webcamRef = useRef<Webcam>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  return (
+    <main>
+      <div className="webcam-container">
+        <Webcam
+          width={videoSize.width}
+          height={videoSize.height}
+          ref={webcamRef}
+        />
+        <canvas
+          width={videoSize.width}
+          height={videoSize.height}
+          ref={canvasRef}
+          className="filter-canvas"
+        />
+      </div>
+    </main>
+  );
+}
+
+...
+```
+
+드디어 메인 로직이다. 동작은 다음과 같다.
+
+1. 최초 1회 인식 모델을 로드한다. (2회 이상 호출 시 에러가 발생한다.)
+2. 로드 이후 `requestAnimationFrame`을 이용해 `estimateFacesLoop`를 호출한다.
+   - 여기서 `estimateFacesLoop`는 웹캠 정보를 바탕으로 얼굴 인식을 진행하고, 캔버스를 초기화한 뒤 얼굴 인식 정보를 기반으로 계산한 선글라스 위치에 선글라스를 그린다.
+   - 다음 프레임에도 동일한 동작을 하게끔 `requestAnimationFrame`에서 `estimateFacesLoop`를 재귀적으로 호출한다.
+
+```tsx
+function App() {
+  ...
+  // Strict Mode에서 useEffect 중복 실행 방지
+  const initialLoadedRef = useRef<boolean>(false);
+
+  const estimateFacesLoop = (
+    model: FaceLandmarksDetector,
+    image: HTMLImageElement,
+    ctx: CanvasRenderingContext2D,
+  ) => {
+    const video = webcamRef.current?.video;
+
+    if (!video) return;
+
+    model.estimateFaces(video).then((face) => {
+      // 캔버스 초기화
+      ctx.clearRect(0, 0, videoSize.width, videoSize.height);
+
+      if (face[0]) {
+        const { x, y, width, height } = calculateFilterPosition(
+          face[0].keypoints,
+        );
+        // 계산한 선글라스 위치에 이미지 그리기
+        ctx.drawImage(image, x, y, width, height);
+      }
+
+      // 재귀적으로 호출
+      requestAnimationFrame(() => estimateFacesLoop(model, image, ctx));
+    });
+  };
+
+  useEffect(() => {
+    const canvasContext = canvasRef.current?.getContext("2d");
+
+    if (!canvasContext || initialLoadedRef.current) return;
+
+    initialLoadedRef.current = true;
+
+    const image = new Image();
+    image.src = "sunglasses.png";
+
+    // 인식 모델 로드
+    loadDetectionModel().then((model) => {
+      requestAnimationFrame(() =>
+        estimateFacesLoop(model, image, canvasContext),
+      );
+    });
+  }, []);
+  ...
+}
+```
+
+최종 코드는 [여기](https://github.com/mkitwave/thug-life-cam)에서 확인할 수 있다.
+
+## 마무리하며
+
+머신러닝 관련으로는 일자무식인지라 구현 전에 걱정을 많이 했는데, 전문 지식이 없어도 구현 가능한 수준의 API가 제공되어 다행이었다.
+
+작성한 튜토리얼에는 몇 가지 챙기지 못한 부분이 있다.
+
+- 얼굴 각도가 반영되지 않는다.
+- 1명의 얼굴만 인식할 수 있다.
+- 모델 로드 시간이 오래 걸린다.
+- 설명이 조금 복잡하다: 글로 코드를 설명하는 것의 한계
+
+기회가 된다면 개선된 버전의 튜토리얼을 만들어보고 싶다.
+
+## 참고 문서
+
+- [Face landmark detection in React — the right way | Magda Odrowąż-Żelezik](https://magdazelezik.medium.com/face-landmark-detection-in-react-the-right-way-3bcd63e1d108)
+- [React + TypeScript: Face detection with Tensorflow | Yuiko Koyanagi](https://dev.to/yuikoito/face-detection-by-using-tensorflow-react-typescript-3dn5)
+- [Iris landmark tracking in the browser with MediaPipe and TensorFlow.js | TensorFlow.js](https://blog.tensorflow.org/2020/11/iris-landmark-tracking-in-browser-with-MediaPipe-and-TensorFlowJS.html)
