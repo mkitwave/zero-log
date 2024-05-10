@@ -13,17 +13,21 @@ export const Eyes = () => {
   const [orientation, setOrientation] = useState<string>("undefined");
 
   useEffect(() => {
-    if (!checkIsMobile()) return;
+    if (!checkIsMobile()) {
+      alert("모바일 아님");
+
+      return;
+    }
 
     const deviceOrientationEvent =
       window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
-
     if (
       deviceOrientationEvent !== undefined &&
       typeof deviceOrientationEvent.requestPermission === "function"
     ) {
       deviceOrientationEvent.requestPermission().then((state) => {
         if (state === "granted") {
+          alert("granted");
           window.addEventListener("deviceorientation", (event) => {
             setOrientation(
               `${event.absolute}, ${event.alpha}, ${event.beta}, ${event.gamma}`,
@@ -43,14 +47,14 @@ export const Eyes = () => {
   }, []);
 
   return (
-    <div>
+    <>
       <Canvas shadows camera={{ position: [0, 0, 24], fov: 40 }}>
         <ambientLight intensity={1} />
         <directionalLight position={[10, 10, 10]} />
         <Eye position={[-4.5, 0, 1]} />
         <Eye position={[4.5, 0, 1]} />
       </Canvas>
-      <span className="text-black">{orientation}</span>
-    </div>
+      <span className="absolute text-black">{orientation}</span>
+    </>
   );
 };
