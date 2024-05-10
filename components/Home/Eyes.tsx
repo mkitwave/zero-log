@@ -10,18 +10,18 @@ const Eye = ({ position }: { position: [number, number, number] }) => {
   const irisGroupRef = useRef<THREE.Group>(null);
   const irisMeshRef = useRef<THREE.Mesh>(null);
 
-  const handleMouseMove = (event: MouseEvent) => {
-    if (!irisGroupRef.current) return;
-    const iris = irisGroupRef.current;
-
-    const x = (event.clientX / window.innerWidth) * 2 - 1;
-    const y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    iris.position.x = Math.atan2(x, 0.5);
-    iris.position.y = Math.atan2(y, 0.5);
-  };
-
   useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!irisGroupRef.current) return;
+      const iris = irisGroupRef.current;
+
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      iris.position.x = Math.atan2(x, 0.5);
+      iris.position.y = Math.atan2(y, 0.5);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
@@ -59,7 +59,9 @@ interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
 export const Eyes = () => {
   const [orientation, setOrientation] = useState<string>("undefined");
 
-  const requestPermissionSafari = () => {
+  useEffect(() => {
+    if (!isMobile) return;
+
     const deviceOrientationEvent =
       window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
 
@@ -85,12 +87,6 @@ export const Eyes = () => {
         );
       });
     }
-  };
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    requestPermissionSafari();
   }, []);
 
   return (
