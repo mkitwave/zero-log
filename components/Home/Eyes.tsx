@@ -59,10 +59,10 @@ interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
 export const Eyes = () => {
   const [orientation, setOrientation] = useState<string>("undefined");
 
-  const deviceOrientationEvent =
-    window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
-
   const requestPermissionSafari = () => {
+    const deviceOrientationEvent =
+      window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
+
     if (
       deviceOrientationEvent !== undefined &&
       typeof deviceOrientationEvent.requestPermission === "function"
@@ -91,7 +91,7 @@ export const Eyes = () => {
     if (!isMobile) return;
 
     requestPermissionSafari();
-  });
+  }, []);
 
   return (
     <div>
