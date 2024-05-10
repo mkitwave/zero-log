@@ -1,26 +1,27 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { isMobile } from "../../lib/isMobile";
 
 const Eye = ({ position }: { position: [number, number, number] }) => {
   const isLeft = position[0] < 0;
   const irisGroupRef = useRef<THREE.Group>(null);
   const irisMeshRef = useRef<THREE.Mesh>(null);
 
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!irisGroupRef.current) return;
+    const iris = irisGroupRef.current;
+
+    const x = (event.clientX / window.innerWidth) * 2 - 1;
+    const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    iris.position.x = Math.atan2(x, 0.5);
+    iris.position.y = Math.atan2(y, 0.5);
+  };
+
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!irisGroupRef.current) return;
-      const iris = irisGroupRef.current;
-
-      const x = (event.clientX / window.innerWidth) * 2 - 1;
-      const y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-      iris.position.x = Math.atan2(x, 0.5);
-      iris.position.y = Math.atan2(y, 0.5);
-    };
-
     window.addEventListener("mousemove", handleMouseMove);
 
     return () => {
@@ -52,12 +53,49 @@ const Eye = ({ position }: { position: [number, number, number] }) => {
 };
 
 export const Eyes = () => {
+  const [orientation, setOrientation] = useState<string>("undefined");
+
+  const isSafariOver13 =
+    window.DeviceOrientationEvent !== undefined &&
+    typeof window.DeviceOrientationEvent.requestPermission === "function";
+
+  const requestPermissionSafari = () => {
+    if (isSafariOver13) {
+      window.DeviceOrientationEvent.requestPermission().then((state) => {
+        if (state === "granted") {
+          window.addEventListener("deviceorientation", (event) => {
+            setOrientation(
+              `${event.absolute}, ${event.alpha}, ${event.beta}, ${event.gamma}`,
+            );
+          });
+        } else if (state === "denied") {
+          alert("denied");
+        }
+      });
+    } else {
+      window.addEventListener("deviceorientation", (event) => {
+        setOrientation(
+          `${event.absolute}, ${event.alpha}, ${event.beta}, ${event.gamma}`,
+        );
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    requestPermissionSafari();
+  });
+
   return (
-    <Canvas shadows camera={{ position: [0, 0, 24], fov: 40 }}>
-      <ambientLight intensity={1} />
-      <directionalLight position={[10, 10, 10]} />
-      <Eye position={[-4.5, 0, 1]} />
-      <Eye position={[4.5, 0, 1]} />
-    </Canvas>
+    <div>
+      <Canvas shadows camera={{ position: [0, 0, 24], fov: 40 }}>
+        <ambientLight intensity={1} />
+        <directionalLight position={[10, 10, 10]} />
+        <Eye position={[-4.5, 0, 1]} />
+        <Eye position={[4.5, 0, 1]} />
+      </Canvas>
+      <span className="text-black">{orientation}</span>
+    </div>
   );
 };
