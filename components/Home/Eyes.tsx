@@ -22,12 +22,12 @@ export const Eyes = () => {
     const deviceOrientationEvent =
       window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
 
-    alert(deviceOrientationEvent);
     if (
       deviceOrientationEvent !== undefined &&
       typeof deviceOrientationEvent.requestPermission === "function"
     ) {
       deviceOrientationEvent.requestPermission().then((state) => {
+        alert(state);
         if (state === "granted") {
           alert("granted");
           window.addEventListener("deviceorientation", (event) => {
