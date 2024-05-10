@@ -52,16 +52,22 @@ const Eye = ({ position }: { position: [number, number, number] }) => {
   );
 };
 
+interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
+  requestPermission?: () => Promise<"granted" | "denied">;
+}
+
 export const Eyes = () => {
   const [orientation, setOrientation] = useState<string>("undefined");
 
-  const isSafariOver13 =
-    window.DeviceOrientationEvent !== undefined &&
-    typeof window.DeviceOrientationEvent.requestPermission === "function";
+  const deviceOrientationEvent =
+    window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;
 
   const requestPermissionSafari = () => {
-    if (isSafariOver13) {
-      window.DeviceOrientationEvent.requestPermission().then((state) => {
+    if (
+      deviceOrientationEvent !== undefined &&
+      typeof deviceOrientationEvent.requestPermission === "function"
+    ) {
+      deviceOrientationEvent.requestPermission().then((state) => {
         if (state === "granted") {
           window.addEventListener("deviceorientation", (event) => {
             setOrientation(
