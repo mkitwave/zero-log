@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
-import { isMobile } from "../../lib/isMobile";
+import { checkIsMobile } from "../../lib/isMobile";
 import { Eye } from "./Eye";
 
 interface DeviceOrientationEventiOS extends DeviceOrientationEvent {
@@ -13,7 +13,7 @@ export const Eyes = () => {
   const [orientation, setOrientation] = useState<string>("undefined");
 
   useEffect(() => {
-    if (!isMobile) return;
+    if (!checkIsMobile()) return;
 
     const deviceOrientationEvent =
       window.DeviceOrientationEvent as unknown as DeviceOrientationEventiOS;

@@ -11,4 +11,5 @@ function detectMobileDevice(agent: string) {
   return mobileRegex.some((mobile) => agent.match(mobile));
 }
 
-export const isMobile = detectMobileDevice(window.navigator.userAgent);
+export const checkIsMobile = () =>
+  detectMobileDevice(window.navigator.userAgent);
