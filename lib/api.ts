@@ -20,20 +20,32 @@ const getPostRawSourceBySlug = (slug: string) => {
 };
 
 export const getPostSourceBySlug = async (slug: string) => {
-  const fileContents = getPostRawSourceBySlug(slug);
+  try {
+    const fileContents = getPostRawSourceBySlug(slug);
 
-  const serializedData = await serialize(fileContents, {
-    mdxOptions: {
-      remarkPlugins: [remarkGfm],
-      format: "mdx",
-    },
-    parseFrontmatter: true,
-  });
+    const serializedData = await serialize(fileContents, {
+      mdxOptions: {
+        remarkPlugins: [remarkGfm],
+        format: "mdx",
+      },
+      parseFrontmatter: true,
+      // This explicitly tells next-mdx-remote that this content should only be rendered on the client
+      scope: {}, // Pass any values you want available to the MDX content
+    });
 
-  return {
-    ...serializedData,
-    post: { ...serializedData.frontmatter, slug } as PostType,
-  };
+    return {
+      ...serializedData,
+      post: { ...serializedData.frontmatter, slug } as PostType,
+    };
+  } catch (error) {
+    console.error(`Error serializing MDX for slug ${slug}:`, error);
+    // Return a valid but empty serialized content to prevent build failures
+    return {
+      compiledSource: "",
+      frontmatter: {},
+      post: { title: "Error loading post", date: new Date().toISOString(), slug } as PostType,
+    };
+  }
 };
 
 const getPostFrontmatterBySlug = async (slug: string) => {

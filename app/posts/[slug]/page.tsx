@@ -9,12 +9,13 @@ import { BLOG_TITLE } from "../../../lib/constants";
 import "../../../styles/markdown.css";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({
-  params: { slug },
+  params,
 }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const { post } = await getPostSourceBySlug(slug);
   const title = `${post.title} | ${BLOG_TITLE}`;
 
@@ -39,10 +40,15 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  return getPostSlugs().map((slug) => ({ slug }));
+  const slugs = getPostSlugs();
+
+  return slugs.map((slug) => ({
+    slug,
+  }));
 }
 
-export default async function PostPage({ params: { slug } }: Props) {
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params;
   const source = await getPostSourceBySlug(slug);
   const post = source.post;
 
