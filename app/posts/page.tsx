@@ -1,12 +1,10 @@
-import { getAllPosts } from "../../lib/api";
 import { PreviewPostList } from "../../components/Post";
+import { getAllPosts } from "../../lib/api";
 
-export const metadata = {
-  title: `Posts`,
-};
-
-export default async function Posts() {
+export default async function Home() {
   const allPosts = await getAllPosts();
 
-  return <PreviewPostList posts={allPosts} />;
+  return (
+    <PreviewPostList posts={allPosts} />
+  );
 }

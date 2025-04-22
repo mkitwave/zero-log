@@ -1,10 +1,8 @@
 import fs from "fs";
-import { join } from "path";
-import PostType from "../interfaces/post";
 import { serialize } from "next-mdx-remote/serialize";
+import { join } from "path";
 import remarkGfm from "remark-gfm";
-import rehypeCode from "rehype-pretty-code";
-import { getShikiHighlighter } from "./shiki/getShikiHighlighter";
+import PostType from "../interfaces/post";
 
 const postsDirectory = join(process.cwd(), "_posts");
 
@@ -27,17 +25,6 @@ export const getPostSourceBySlug = async (slug: string) => {
   const serializedData = await serialize(fileContents, {
     mdxOptions: {
       remarkPlugins: [remarkGfm],
-      rehypePlugins: [
-        [
-          // @ts-ignore @TODO rehype-pretty-code 의존성 오류
-          rehypeCode,
-          {
-            theme: "solarized-light",
-            getHighlighter: getShikiHighlighter,
-            keepBackground: false,
-          },
-        ],
-      ],
       format: "mdx",
     },
     parseFrontmatter: true,

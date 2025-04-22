@@ -14,31 +14,28 @@ export const Toc = () => {
   }, []);
 
   return (
-    <div className="sticky top-36 h-0 w-full md:flex hidden justify-end">
-      <div className="absolute flex flex-col items-start gap-y-1.5">
-        {headingElements.map((element, index) => (
-          <a
-            key={index}
-            href={`#${element.textContent}`}
-            onClick={(event) => {
-              event.preventDefault();
-              window.scrollTo({
-                behavior: "smooth",
-                top: element.getBoundingClientRect().top + window.scrollY - 100,
-              });
-            }}
-            className={`text-sm text-gray-800 ${
-              element.tagName.toLowerCase() === "h2"
-                ? ""
-                : element.tagName.toLowerCase() === "h3"
-                ? "pl-3"
-                : "pl-6"
+    <div className="flex flex-col items-start gap-y-1.5 pt-10">
+      {headingElements.map((element, index) => (
+        <a
+          key={index}
+          href={`#${element.textContent}`}
+          onClick={(event) => {
+            event.preventDefault();
+            window.scrollTo({
+              behavior: "smooth",
+              top: element.getBoundingClientRect().top + window.scrollY - 100,
+            });
+          }}
+          className={`text-sm text-gray-800 ${element.tagName.toLowerCase() === "h2"
+            ? ""
+            : element.tagName.toLowerCase() === "h3"
+              ? "pl-3"
+              : "pl-6"
             }`}
-          >
-            {element.textContent}
-          </a>
-        ))}
-      </div>
+        >
+          {element.textContent}
+        </a>
+      ))}
     </div>
   );
 };

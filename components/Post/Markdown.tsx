@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote";
+import Image from "next/image";
 import { getPostSourceBySlug } from "../../lib/api";
 
 type Props = {
